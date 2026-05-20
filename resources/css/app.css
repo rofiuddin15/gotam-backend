@@ -1,0 +1,74 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../**/*.jsx';
+
+@theme {
+    /* Custom Colors from Mockup */
+    --color-primary: #000f22;
+    --color-primary-container: #0a2540;
+    --color-primary-fixed: #d2e4ff;
+    --color-primary-fixed-dim: #b0c8eb;
+    
+    --color-secondary: #705d00;
+    --color-secondary-container: #fcd400;
+    --color-secondary-fixed: #ffe16d;
+    
+    --color-tertiary: #000c30;
+    --color-tertiary-container: #001f5e;
+    --color-tertiary-fixed: #dbe1ff;
+    --color-tertiary-fixed-dim: #b4c5ff;
+
+    --color-surface: #f7fafc;
+    --color-surface-bright: #f7fafc;
+    --color-surface-dim: #d7dadc;
+    --color-surface-variant: #e0e3e5;
+    --color-surface-container: #ebeef0;
+    --color-surface-container-low: #f1f4f6;
+    --color-surface-container-high: #e5e9eb;
+    --color-surface-container-highest: #e0e3e5;
+    --color-surface-container-lowest: #ffffff;
+
+    --color-background: #f7fafc;
+    --color-outline: #74777e;
+    --color-outline-variant: #c4c6ce;
+    
+    --color-on-primary: #ffffff;
+    --color-on-secondary: #ffffff;
+    --color-on-surface: #181c1e;
+    --color-on-surface-variant: #43474d;
+    --color-on-background: #181c1e;
+    
+    --color-error: #ba1a1a;
+    --color-error-container: #ffdad6;
+    --color-on-error-container: #93000a;
+
+    /* Spacing & Radii */
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+
+    /* Fonts */
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+    body {
+        @apply bg-background text-on-background antialiased;
+    }
+    
+    /* Custom Scrollbar to match mockup */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #c4c6ce;
+        border-radius: 4px;
+    }
+}
