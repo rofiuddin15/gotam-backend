@@ -137,4 +137,52 @@ class ReportController extends Controller
             'top_customers' => $topCustomers,
         ]);
     }
+
+    /**
+     * Laporan Arus Kas / Jurnal Umum
+     */
+    public function cashFlow(Request $request)
+    {
+        $query = WalletTransaction::with(['wallet.user']);
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('wallet.user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $transactions = $query->orderBy('created_at', 'desc')->paginate($request->input('per_page', 15));
+
+        return response()->json($transactions);
+    }
+
+    /**
+     * Laporan Uang Keluar (Withdrawals)
+     */
+    public function withdrawalsReport(Request $request)
+    {
+        $query = Withdrawal::with(['user']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $withdrawals = $query->orderBy('created_at', 'desc')->paginate($request->input('per_page', 15));
+
+        return response()->json($withdrawals);
+    }
 }

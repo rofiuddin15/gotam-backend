@@ -77,5 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Reports Management
         Route::get('/admin/reports/financial', [ReportController::class, 'financialReport']);
         Route::get('/admin/reports/users', [ReportController::class, 'userReport']);
+        Route::get('/admin/reports/cash-flow', [ReportController::class, 'cashFlow']);
+        Route::get('/admin/reports/withdrawals', [ReportController::class, 'withdrawalsReport']);
     });
 });

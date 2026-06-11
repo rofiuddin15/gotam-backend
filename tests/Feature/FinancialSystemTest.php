@@ -117,4 +117,24 @@ class FinancialSystemTest extends TestCase
         // Partner wallet decremented by 10% commission (Rp 2,000)
         $this->assertEquals(8000, $partner->wallet->fresh()->balance);
     }
+
+    public function test_admin_can_access_reports_endpoints()
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $admin->assignRole('admin');
+
+        // Access cash-flow
+        $response = $this->actingAs($admin)
+            ->getJson('/api/admin/reports/cash-flow');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure(['data', 'current_page', 'last_page']);
+
+        // Access withdrawals report
+        $response = $this->actingAs($admin)
+            ->getJson('/api/admin/reports/withdrawals');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure(['data', 'current_page', 'last_page']);
+    }
 }

@@ -49,12 +49,38 @@ export const fetchFinancialReports = createAsyncThunk(
     }
 );
 
+export const fetchCashFlow = createAsyncThunk(
+    'transaction/fetchCashFlow',
+    async (params, { rejectWithValue }) => {
+        try {
+            const response = await api.get('/admin/reports/cash-flow', { params });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const fetchWithdrawalsReport = createAsyncThunk(
+    'transaction/fetchWithdrawalsReport',
+    async (params, { rejectWithValue }) => {
+        try {
+            const response = await api.get('/admin/reports/withdrawals', { params });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 const transactionSlice = createSlice({
     name: 'transaction',
     initialState: {
         withdrawals: [],
         earnings: null,
         financialReport: null,
+        cashFlowData: null,
+        withdrawalsReportData: null,
         loading: false,
         error: null
     },
@@ -86,6 +112,28 @@ const transactionSlice = createSlice({
                 state.financialReport = action.payload;
             })
             .addCase(fetchFinancialReports.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(fetchCashFlow.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(fetchCashFlow.fulfilled, (state, action) => {
+                state.loading = false;
+                state.cashFlowData = action.payload;
+            })
+            .addCase(fetchCashFlow.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(fetchWithdrawalsReport.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(fetchWithdrawalsReport.fulfilled, (state, action) => {
+                state.loading = false;
+                state.withdrawalsReportData = action.payload;
+            })
+            .addCase(fetchWithdrawalsReport.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             });
