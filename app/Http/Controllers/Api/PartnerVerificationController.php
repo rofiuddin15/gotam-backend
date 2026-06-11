@@ -26,6 +26,6 @@ class PartnerVerificationController extends Controller
     {
         $user->mitraProfile()->update(['status_verified' => true]);
 
-        return response()->json(['message' => 'Partner verified successfully.']);
+        return response()->json(['message' => 'Mitra berhasil diverifikasi.']);
     }
 }

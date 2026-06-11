@@ -37,20 +37,20 @@ const PartnerVerification = () => {
         <div className="flex flex-col gap-10 animate-in fade-in duration-500">
             <div className="flex justify-between items-end">
                 <div>
-                    <h2 className="text-[32px] font-bold text-on-background tracking-tight">Partner Verification</h2>
-                    <p className="text-[16px] text-on-surface-variant font-medium">Review and approve new workshop registration requests.</p>
+                    <h2 className="text-[32px] font-bold text-on-background tracking-tight">Verifikasi Mitra</h2>
+                    <p className="text-[16px] text-on-surface-variant font-medium">Tinjau dan setujui permintaan pendaftaran bengkel baru.</p>
                 </div>
                 <button className="flex items-center gap-2 text-primary hover:bg-primary-fixed px-6 py-3 rounded-xl font-bold text-[14px] transition-colors border border-primary active:scale-95">
                     <Download size={20} />
-                    <span>Export Requests</span>
+                    <span>Ekspor Permintaan</span>
                 </button>
             </div>
 
             <div className="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,15,34,0.05)] border border-outline-variant/20 flex flex-col overflow-hidden">
                 <div className="p-8 border-b border-outline-variant/20 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-surface-bright">
                     <div className="flex bg-surface-container-low p-1 rounded-xl">
-                        <button className="px-6 py-2.5 bg-white shadow-sm rounded-lg text-[12px] font-bold text-primary">All Pending</button>
-                        <button className="px-6 py-2.5 text-[12px] font-bold text-on-surface-variant opacity-60">Action Required</button>
+                        <button className="px-6 py-2.5 bg-white shadow-sm rounded-lg text-[12px] font-bold text-primary">Semua Tertunda</button>
+                        <button className="px-6 py-2.5 text-[12px] font-bold text-on-surface-variant opacity-60">Butuh Tindakan</button>
                     </div>
 
                     <div className="flex items-center space-x-4">
@@ -60,7 +60,7 @@ const PartnerVerification = () => {
                             </span>
                             <input 
                                 className="block w-full pl-11 pr-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-xl text-[14px] placeholder:text-outline focus:ring-2 focus:ring-primary/10 transition-all" 
-                                placeholder="Search workshops..."
+                                placeholder="Cari bengkel..."
                             />
                         </div>
                     </div>
@@ -75,11 +75,11 @@ const PartnerVerification = () => {
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                    <th className="px-10 py-5 font-bold">Workshop Name</th>
-                                    <th className="px-10 py-5 font-bold">Owner Details</th>
-                                    <th className="px-10 py-5 font-bold">Registration Date</th>
-                                    <th className="px-10 py-5 font-bold">Business Documents</th>
-                                    <th className="px-10 py-5 font-bold text-right">Decision</th>
+                                    <th className="px-10 py-5 font-bold">Nama Bengkel</th>
+                                    <th className="px-10 py-5 font-bold">Detail Pemilik</th>
+                                    <th className="px-10 py-5 font-bold">Tanggal Pendaftaran</th>
+                                    <th className="px-10 py-5 font-bold">Dokumen Bisnis</th>
+                                    <th className="px-10 py-5 font-bold text-right">Keputusan</th>
                                 </tr>
                             </thead>
                             <tbody className="text-[14px] divide-y divide-outline-variant/10">
@@ -117,7 +117,7 @@ const PartnerVerification = () => {
                                         <td className="px-10 py-6">
                                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container text-primary font-bold text-[11px] uppercase tracking-wider border border-outline-variant/30">
                                                 <Clock size={12} />
-                                                <span>Under Review</span>
+                                                <span>Sedang Ditinjau</span>
                                             </div>
                                         </td>
                                         <td className="px-10 py-6 text-right">
@@ -126,13 +126,13 @@ const PartnerVerification = () => {
                                                     onClick={() => handleVerify(req.id, 'rejected')}
                                                     className="px-4 py-2 bg-error-container text-on-error-container rounded-lg text-[12px] font-bold hover:bg-error hover:text-white transition-all active:scale-95"
                                                 >
-                                                    Reject
+                                                    Tolak
                                                 </button>
                                                 <button 
                                                     onClick={() => handleVerify(req.id, 'verified')}
                                                     className="px-4 py-2 bg-secondary-container text-on-secondary-container rounded-lg text-[12px] font-bold hover:bg-secondary hover:text-white transition-all active:scale-95 shadow-sm"
                                                 >
-                                                    Approve
+                                                    Setujui
                                                 </button>
                                             </div>
                                         </td>
@@ -145,7 +145,7 @@ const PartnerVerification = () => {
                             <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center">
                                 <CheckCircle2 className="text-outline" size={32} />
                             </div>
-                            <p className="text-on-surface-variant font-bold">All caught up! No pending verification requests.</p>
+                            <p className="text-on-surface-variant font-bold">Semua selesai! Tidak ada permintaan verifikasi yang tertunda.</p>
                         </div>
                     )}
                 </div>
@@ -153,7 +153,7 @@ const PartnerVerification = () => {
                 {Array.isArray(requests) && requests.length > 0 && (
                     <div className="p-8 border-t border-outline-variant/20 flex items-center justify-between bg-surface-bright">
                         <p className="text-[12px] font-bold text-on-surface-variant">
-                            Showing <span className="text-primary">{requests.length}</span> pending registrations
+                            Menampilkan <span className="text-primary">{requests.length}</span> pendaftaran tertunda
                         </p>
                         <div className="flex items-center gap-2">
                             <button className="p-2.5 border border-outline-variant/30 rounded-xl text-outline hover:text-primary transition-all disabled:opacity-30">

@@ -139,7 +139,7 @@ const FinancialReports = () => {
         let filename = "";
 
         if (activeTab === 'payouts') {
-            filename = "payout_requests.xls";
+            filename = "permintaan_pencairan.xls";
             headers = ["ID", "Nama Partner", "Email", "Jumlah Penarikan", "Bank", "No. Rekening", "Nama Rekening", "Tanggal Permintaan"];
             data = withdrawals.map(w => [
                 w.id,
@@ -203,7 +203,7 @@ const FinancialReports = () => {
                     <x:ExcelWorkbook>
                         <x:ExcelWorksheets>
                             <x:ExcelWorksheet>
-                                <x:Name>GoTam Financial Report</x:Name>
+                                <x:Name>GoTam Laporan Keuangan</x:Name>
                                 <x:WorksheetOptions>
                                     <x:DisplayGridlines/>
                                 </x:WorksheetOptions>
@@ -274,9 +274,9 @@ const FinancialReports = () => {
         const label = {
             deposit: 'Top-up',
             withdrawal: 'Penarikan',
-            commission_deduction: 'Platform Fee',
-            earnings: 'Earnings',
-            payment: 'Payment'
+            commission_deduction: 'Komisi Platform',
+            earnings: 'Pendapatan Mitra',
+            payment: 'Pembayaran'
         }[type] || type;
 
         return <Badge variant={variant}>{label}</Badge>;
@@ -290,9 +290,9 @@ const FinancialReports = () => {
         }[status] || 'secondary';
 
         const label = {
-            pending: 'Pending',
-            completed: 'Success',
-            rejected: 'Rejected'
+            pending: 'Tertunda',
+            completed: 'Sukses',
+            rejected: 'Ditolak'
         }[status] || status;
 
         const icon = {
@@ -353,7 +353,7 @@ const FinancialReports = () => {
     const payoutColumns = [
         {
             accessorKey: 'user.name',
-            header: 'User/Partner Name',
+            header: 'Nama Pengguna/Mitra',
             cell: (info) => {
                 const row = info.row.original;
                 return (
@@ -371,12 +371,12 @@ const FinancialReports = () => {
         },
         {
             accessorKey: 'amount',
-            header: 'Amount',
+            header: 'Jumlah',
             cell: (info) => <span className="font-bold text-[14px] text-primary">Rp {Number(info.getValue()).toLocaleString('id-ID')}</span>
         },
         {
             accessorKey: 'bank_name',
-            header: 'Bank Details',
+            header: 'Detail Bank',
             cell: (info) => {
                 const row = info.row.original;
                 return (
@@ -389,7 +389,7 @@ const FinancialReports = () => {
         },
         {
             accessorKey: 'created_at',
-            header: 'Request Date',
+            header: 'Tanggal Permintaan',
             cell: (info) => (
                 <div className="flex items-center gap-2 text-on-surface-variant font-semibold">
                     <Clock size={16} className="text-outline" />
@@ -399,7 +399,7 @@ const FinancialReports = () => {
         },
         {
             id: 'actions',
-            header: () => <div className="text-right">Decision</div>,
+            header: () => <div className="text-right">Keputusan</div>,
             cell: (info) => {
                 const id = info.row.original.id;
                 return (
@@ -409,14 +409,14 @@ const FinancialReports = () => {
                             variant="success"
                             size="sm"
                         >
-                            Approve
+                            Setujui
                         </Button>
                         <Button 
                             onClick={() => handleReject(id)}
                             variant="dangerOutline"
                             size="sm"
                         >
-                            Reject
+                            Tolak
                         </Button>
                     </div>
                 );
@@ -443,7 +443,7 @@ const FinancialReports = () => {
         },
         {
             accessorKey: 'wallet.user.name',
-            header: 'User',
+            header: 'Pengguna',
             cell: (info) => {
                 const row = info.row.original;
                 const userName = row.wallet?.user?.name || 'System';
@@ -509,7 +509,7 @@ const FinancialReports = () => {
         },
         {
             accessorKey: 'wallet.user.name',
-            header: 'User',
+            header: 'Pengguna',
             cell: (info) => {
                 const row = info.row.original;
                 const userName = row.wallet?.user?.name || 'System';
@@ -567,7 +567,7 @@ const FinancialReports = () => {
         },
         {
             accessorKey: 'user.name',
-            header: 'User/Mitra',
+            header: 'Pengguna/Mitra',
             cell: (info) => {
                 const row = info.row.original;
                 const userName = row.user?.name || '';
@@ -596,7 +596,7 @@ const FinancialReports = () => {
         },
         {
             accessorKey: 'bank_name',
-            header: 'Bank Details',
+            header: 'Detail Bank',
             cell: (info) => {
                 const row = info.row.original;
                 return (
@@ -625,14 +625,14 @@ const FinancialReports = () => {
                                 variant="success"
                                 size="sm"
                             >
-                                Approve
+                                Setujui
                             </Button>
                             <Button 
                                 onClick={() => handleReject(row.id)}
                                 variant="dangerOutline"
                                 size="sm"
                             >
-                                Reject
+                                Tolak
                             </Button>
                         </div>
                     );
@@ -676,8 +676,8 @@ const FinancialReports = () => {
             {/* Page Header */}
             <div className="flex justify-between items-end">
                 <div>
-                    <h2 className="text-[32px] font-bold text-on-background tracking-tight">Financial Reports & Ledger</h2>
-                    <p className="text-[16px] text-on-surface-variant font-medium">Manage payouts, track platform revenue, and monitor company ledger sheets.</p>
+                    <h2 className="text-[32px] font-bold text-on-background tracking-tight">Laporan Keuangan & Buku Besar</h2>
+                    <p className="text-[16px] text-on-surface-variant font-medium">Kelola pencairan dana, lacak pendapatan platform, dan pantau pembukuan perusahaan.</p>
                 </div>
                 <div className="flex gap-3">
                     <Button 
@@ -687,7 +687,7 @@ const FinancialReports = () => {
                         icon={RefreshCw}
                         className={loading ? 'animate-spin' : ''}
                     >
-                        Refresh
+                        Muat Ulang
                     </Button>
                     <Button 
                         onClick={handleDownloadExcel}
@@ -695,7 +695,7 @@ const FinancialReports = () => {
                         size="lg"
                         icon={Download}
                     >
-                        Export Excel
+                        Ekspor Excel
                     </Button>
                 </div>
             </div>
@@ -703,10 +703,10 @@ const FinancialReports = () => {
             {/* Financial Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {[
-                    { label: 'Platform Net Commission', value: financialReport?.income_statement?.platform_commission_formatted || 'Rp 0', icon: TrendingUp, color: 'bg-green-50' },
-                    { label: 'Total Withdrawals', value: financialReport?.balance_sheet?.total_withdrawals_formatted || 'Rp 0', icon: Banknote, color: 'bg-blue-50' },
-                    { label: 'Held Wallet Balances (Liability)', value: financialReport?.balance_sheet?.held_user_balances_liability_formatted || 'Rp 0', icon: CreditCard, color: 'bg-amber-50' },
-                    { label: 'Simulated Bank Cash', value: financialReport?.balance_sheet?.simulated_bank_balance_formatted || 'Rp 0', icon: ArrowUpRight, color: 'bg-purple-50' },
+                    { label: 'Komisi Bersih Platform', value: financialReport?.income_statement?.platform_commission_formatted || 'Rp 0', icon: TrendingUp, color: 'bg-green-50' },
+                    { label: 'Total Penarikan Dana', value: financialReport?.balance_sheet?.total_withdrawals_formatted || 'Rp 0', icon: Banknote, color: 'bg-blue-50' },
+                    { label: 'Saldo Dompet Mengendap (Liabilitas)', value: financialReport?.balance_sheet?.held_user_balances_liability_formatted || 'Rp 0', icon: CreditCard, color: 'bg-amber-50' },
+                    { label: 'Kas Bank Simulasi', value: financialReport?.balance_sheet?.simulated_bank_balance_formatted || 'Rp 0', icon: ArrowUpRight, color: 'bg-purple-50' },
                 ].map((stat, i) => (
                     <div key={i} className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/20 shadow-sm flex items-center gap-4">
                         <div className={`p-3 rounded-xl ${stat.color}`}>
@@ -723,10 +723,10 @@ const FinancialReports = () => {
             {/* Tabs Navigation */}
             <div className="flex border-b border-outline-variant/20">
                 {[
-                    { id: 'payouts', label: 'Payout Requests', count: withdrawals.length },
+                    { id: 'payouts', label: 'Permintaan Pencairan', count: withdrawals.length },
                     { id: 'cash-flow', label: 'Jurnal / Arus Kas' },
                     { id: 'deposits', label: 'Uang Masuk (Deposits)' },
-                    { id: 'withdrawals', label: 'Uang Keluar (Withdrawals)' },
+                    { id: 'withdrawals', label: 'Uang Keluar (Penarikan)' },
                 ].map((tab) => {
                     const isActive = activeTab === tab.id;
                     return (
@@ -750,15 +750,15 @@ const FinancialReports = () => {
                 })}
             </div>
 
-            {/* Main Content Card (Component Based) */}
+            {/* Main Content Card */}
             <Card
                 title={
-                    activeTab === 'payouts' ? 'Pending Payout Requests' :
+                    activeTab === 'payouts' ? 'Permintaan Pencairan Tertunda' :
                     activeTab === 'cash-flow' ? 'Buku Besar & Arus Kas' :
                     activeTab === 'deposits' ? 'Laporan Uang Masuk' : 'Laporan Uang Keluar (Penarikan)'
                 }
                 subtitle={
-                    activeTab === 'payouts' ? 'Review and process partner withdrawal requests.' :
+                    activeTab === 'payouts' ? 'Tinjau dan proses permintaan penarikan dana dari mitra.' :
                     activeTab === 'cash-flow' ? 'Catatan kronologis dari seluruh transaksi & mutasi saldo di platform.' :
                     activeTab === 'deposits' ? 'Seluruh transaksi pengisian saldo (top-up) dompet oleh pengguna.' :
                     'Riwayat seluruh permintaan penarikan dana beserta status transaksinya.'
@@ -788,9 +788,9 @@ const FinancialReports = () => {
                                     <option value="">Semua Tipe</option>
                                     <option value="deposit">Top-up (Deposit)</option>
                                     <option value="withdrawal">Penarikan (Withdrawal)</option>
-                                    <option value="commission_deduction">Platform Fee</option>
-                                    <option value="earnings">Earnings</option>
-                                    <option value="payment">Payment</option>
+                                    <option value="commission_deduction">Komisi Platform</option>
+                                    <option value="earnings">Pendapatan Mitra</option>
+                                    <option value="payment">Pembayaran Wallet</option>
                                 </select>
                             )}
 
@@ -803,9 +803,9 @@ const FinancialReports = () => {
                                     className="px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-xl text-[14px] text-on-surface focus:outline-none focus:border-primary font-bold cursor-pointer"
                                 >
                                     <option value="">Semua Status</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="completed">Success</option>
-                                    <option value="rejected">Rejected</option>
+                                    <option value="pending">Tertunda</option>
+                                    <option value="completed">Sukses</option>
+                                    <option value="rejected">Ditolak</option>
                                 </select>
                             )}
 
@@ -818,7 +818,7 @@ const FinancialReports = () => {
                 noPadding
                 className="mb-10"
             >
-                {/* Table Area (Component Based) */}
+                {/* Table Area */}
                 <div className="overflow-x-auto w-full">
                     {loading ? (
                         <div className="py-20 flex justify-center">
@@ -835,7 +835,7 @@ const FinancialReports = () => {
                                         <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center">
                                             <CheckCircle2 className="text-outline" size={32} />
                                         </div>
-                                        <p className="text-on-surface-variant font-bold">Great! No pending payout requests at the moment.</p>
+                                        <p className="text-on-surface-variant font-bold">Luar biasa! Tidak ada permintaan pencairan dana yang tertunda saat ini.</p>
                                     </div>
                                 )
                             )}

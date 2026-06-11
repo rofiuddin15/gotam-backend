@@ -43,12 +43,30 @@ const RoleManagement = () => {
         console.log(`Toggling ${permName} for ${selectedRole.name}`);
     };
 
+    const roleLabels = {
+        admin: 'Staf Admin',
+        customer: 'Pelanggan',
+        partner: 'Mitra'
+    };
+
+    const permissionLabels = {
+        manage_users: 'Kelola Pengguna',
+        manage_partners: 'Kelola Mitra',
+        manage_services: 'Kelola Layanan',
+        manage_financials: 'Kelola Keuangan',
+        view_audit_logs: 'Lihat Log Audit'
+    };
+
+    const getPermissionLabel = (name) => {
+        return permissionLabels[name] || name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    };
+
     return (
         <div className="flex flex-col gap-10 animate-in fade-in duration-500">
             {/* Page Header */}
             <div>
-                <h2 className="text-[32px] font-bold text-on-background tracking-tight">System Settings</h2>
-                <p className="text-[16px] text-on-surface-variant font-medium">Manage administrative roles, staff permissions, and access control.</p>
+                <h2 className="text-[32px] font-bold text-on-background tracking-tight">Pengaturan Sistem</h2>
+                <p className="text-[16px] text-on-surface-variant font-medium">Kelola peran administratif, izin staf, dan kontrol akses.</p>
             </div>
 
             {loading ? (
@@ -60,9 +78,9 @@ const RoleManagement = () => {
                     {/* Roles List */}
                     <div className="lg:col-span-1 space-y-4">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-[14px] font-black text-on-surface-variant uppercase tracking-widest">Available Roles</h3>
+                            <h3 className="text-[14px] font-black text-on-surface-variant uppercase tracking-widest">Peran yang Tersedia</h3>
                             <button className="text-primary hover:text-secondary font-bold text-[12px] flex items-center gap-1">
-                                <Plus size={14} /> Add Role
+                                <Plus size={14} /> Tambah Peran
                             </button>
                         </div>
                         <div className="flex flex-col gap-2">
@@ -80,7 +98,7 @@ const RoleManagement = () => {
                                         <div className={`p-2 rounded-lg ${selectedRole?.id === role.id ? 'bg-secondary/20' : 'bg-surface-container'}`}>
                                             <Shield size={18} />
                                         </div>
-                                        <span className="font-bold text-[14px] capitalize">{role.name}</span>
+                                        <span className="font-bold text-[14px] capitalize">{roleLabels[role.name] || role.name}</span>
                                     </div>
                                     <ChevronRight size={16} opacity={selectedRole?.id === role.id ? 1 : 0.3} />
                                 </button>
@@ -93,8 +111,8 @@ const RoleManagement = () => {
                         <div className="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,15,34,0.05)] border border-outline-variant/20 overflow-hidden">
                             <div className="p-8 border-b border-outline-variant/20 bg-surface-bright flex justify-between items-center">
                                 <div>
-                                    <h3 className="text-[20px] font-bold text-primary capitalize">{selectedRole?.name} Permissions</h3>
-                                    <p className="text-[14px] text-on-surface-variant font-medium">Fine-tune what this role can see and do.</p>
+                                    <h3 className="text-[20px] font-bold text-primary capitalize">Izin Peran {roleLabels[selectedRole?.name] || selectedRole?.name}</h3>
+                                    <p className="text-[14px] text-on-surface-variant font-medium">Atur secara rinci apa yang dapat dilihat dan dilakukan oleh peran ini.</p>
                                 </div>
                                 <div className="p-3 bg-primary-fixed text-primary rounded-xl">
                                     <Lock size={20} />
@@ -112,7 +130,7 @@ const RoleManagement = () => {
                                             <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-outline group-hover:text-primary transition-colors">
                                                 <Key size={14} />
                                             </div>
-                                            <span className="text-[13px] font-bold text-on-surface capitalize">{perm.name.replace(/_/g, ' ')}</span>
+                                            <span className="text-[13px] font-bold text-on-surface capitalize">{getPermissionLabel(perm.name)}</span>
                                         </div>
                                         <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                                             selectedRole?.permissions?.find(p => p.id === perm.id)
@@ -126,15 +144,15 @@ const RoleManagement = () => {
                             </div>
 
                             <div className="p-6 bg-surface-bright border-t border-outline-variant/20 flex justify-end gap-3">
-                                <button className="px-6 py-2.5 rounded-lg text-[12px] font-bold text-on-surface-variant hover:bg-surface-container transition-all">Reset Changes</button>
-                                <button className="px-8 py-2.5 bg-primary text-on-primary rounded-lg text-[12px] font-bold hover:bg-primary/90 transition-all shadow-md active:scale-95">Save Permissions</button>
+                                <button className="px-6 py-2.5 rounded-lg text-[12px] font-bold text-on-surface-variant hover:bg-surface-container transition-all">Batalkan Perubahan</button>
+                                <button className="px-8 py-2.5 bg-primary text-on-primary rounded-lg text-[12px] font-bold hover:bg-primary/90 transition-all shadow-md active:scale-95">Simpan Izin</button>
                             </div>
                         </div>
                         
                         <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100 flex items-start gap-4">
                             <ShieldAlert className="text-amber-600 shrink-0" size={20} />
                             <p className="text-[12px] font-semibold text-amber-800">
-                                <span className="font-bold">Security Note:</span> Modifying core permissions can affect platform stability. Ensure you understand the impact of granting administrative access to non-staff roles.
+                                <span className="font-bold">Catatan Keamanan:</span> Mengubah izin utama dapat memengaruhi stabilitas platform. Pastikan Anda memahami dampak dari pemberian akses administratif ke peran non-staf.
                             </p>
                         </div>
                     </div>

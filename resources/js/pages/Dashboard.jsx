@@ -5,11 +5,8 @@ import {
     Wallet, 
     Wrench, 
     Handshake, 
-    ChevronDown, 
-    Filter, 
-    MoreVertical,
-    Activity,
-    Database,
+    Activity, 
+    Database, 
     Loader2
 } from 'lucide-react';
 import { fetchDashboardStats, fetchLiveMonitoring } from '../store/slices/dashboardSlice';
@@ -17,6 +14,27 @@ import { fetchDashboardStats, fetchLiveMonitoring } from '../store/slices/dashbo
 const Dashboard = () => {
     const dispatch = useDispatch();
     const { stats, monitoring, loading } = useSelector((state) => state.dashboard);
+
+    const vehicleTypeLabels = {
+        car: 'Mobil',
+        motorcycle: 'Motor'
+    };
+
+    const tireTypeLabels = {
+        tube: 'Ban Dalam',
+        tubeless: 'Tubeless'
+    };
+
+    const statusLabels = {
+        pending: 'Menunggu',
+        accepted: 'Diterima',
+        on_the_way: 'Dalam Perjalanan',
+        arrived: 'Mekanik Tiba',
+        working: 'Sedang Diperbaiki',
+        completed: 'Selesai',
+        cancelled: 'Dibatalkan'
+    };
+
 
     useEffect(() => {
         dispatch(fetchDashboardStats());
@@ -33,11 +51,11 @@ const Dashboard = () => {
     const onboardingPercentage = Math.min((verifiedOnboarding / targetOnboarding) * 100, 100);
 
     return (
-        <div className="flex flex-col gap-10">
+        <div className="flex flex-col gap-10 animate-in fade-in duration-500">
             {/* Page Header */}
             <div className="flex flex-col gap-1">
-                <h2 className="text-[32px] font-bold text-on-background tracking-tight">Dashboard Overview</h2>
-                <p className="text-[16px] text-on-surface-variant font-medium">Real-time metrics and operational status for GoTam network.</p>
+                <h2 className="text-[32px] font-bold text-on-background tracking-tight">Ringkasan Dashboard</h2>
+                <p className="text-[16px] text-on-surface-variant font-medium">Metrik waktu nyata (real-time) dan status operasional jaringan GoTam.</p>
             </div>
 
             {/* Metrics Grid (Bento Style) */}
@@ -50,7 +68,7 @@ const Dashboard = () => {
                         </div>
                     </div>
                     <div>
-                        <p className="text-[14px] text-on-surface-variant font-medium">Total Transactions</p>
+                        <p className="text-[14px] text-on-surface-variant font-medium">Total Transaksi</p>
                         <p className="text-[24px] font-bold text-primary mt-1">{stats?.stats?.total_transactions || '0'}</p>
                     </div>
                 </div>
@@ -64,7 +82,7 @@ const Dashboard = () => {
                         </div>
                     </div>
                     <div className="relative z-10">
-                        <p className="text-[14px] text-primary-fixed-dim font-medium">Platform Revenue</p>
+                        <p className="text-[14px] text-primary-fixed-dim font-medium">Pendapatan Platform</p>
                         <p className="text-[24px] font-bold text-on-primary mt-1">{stats?.stats?.total_revenue || 'Rp 0'}</p>
                     </div>
                 </div>
@@ -77,7 +95,7 @@ const Dashboard = () => {
                         </div>
                     </div>
                     <div>
-                        <p className="text-[14px] text-on-surface-variant font-medium">Active Bookings</p>
+                        <p className="text-[14px] text-on-surface-variant font-medium">Pesanan Aktif</p>
                         <p className="text-[24px] font-bold text-primary mt-1">{stats?.stats?.active_bookings ?? '0'}</p>
                     </div>
                 </div>
@@ -90,7 +108,7 @@ const Dashboard = () => {
                         </div>
                     </div>
                     <div>
-                        <p className="text-[14px] text-on-surface-variant font-medium">New Partners (30d)</p>
+                        <p className="text-[14px] text-on-surface-variant font-medium">Mitra Baru (30 hari)</p>
                         <p className="text-[24px] font-bold text-primary mt-1">{stats?.stats?.new_partners ?? '0'}</p>
                     </div>
                 </div>
@@ -102,8 +120,8 @@ const Dashboard = () => {
                 <div className="lg:col-span-2 bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_12px_rgba(0,15,34,0.05)] border border-outline-variant/20 flex flex-col">
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h3 className="text-[20px] font-bold text-primary">Monthly Revenue Trend</h3>
-                            <p className="text-[14px] text-on-surface-variant font-medium">Recent booking transactions</p>
+                            <h3 className="text-[20px] font-bold text-primary">Tren Pendapatan Bulanan</h3>
+                            <p className="text-[14px] text-on-surface-variant font-medium">Transaksi pemesanan terakhir</p>
                         </div>
                     </div>
                     
@@ -145,14 +163,14 @@ const Dashboard = () => {
 
                 {/* System Status */}
                 <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_12px_rgba(0,15,34,0.05)] border border-outline-variant/20 flex flex-col">
-                    <h3 className="text-[20px] font-bold text-primary mb-6">System Status</h3>
+                    <h3 className="text-[20px] font-bold text-primary mb-6">Status Sistem</h3>
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-4">
                             <div className="h-12 w-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed-variant">
                                 <Activity size={20} />
                             </div>
                             <div className="flex-1">
-                                <p className="text-[14px] font-bold text-on-surface">Core API Services</p>
+                                <p className="text-[14px] font-bold text-on-surface">Layanan Core API</p>
                                 <p className="text-[12px] font-semibold text-on-surface-variant">{stats?.system_status?.api || '99.9%'}</p>
                             </div>
                             <span className="h-3 w-3 rounded-full bg-[#10b981]"></span>
@@ -162,18 +180,18 @@ const Dashboard = () => {
                                 <Database size={20} />
                             </div>
                             <div className="flex-1">
-                                <p className="text-[14px] font-bold text-on-surface">Partner Sync DB</p>
-                                <p className="text-[12px] font-semibold text-on-surface-variant">Syncing {stats?.system_status?.db || '45ms'}</p>
+                                <p className="text-[14px] font-bold text-on-surface">Sinkronisasi DB Mitra</p>
+                                <p className="text-[12px] font-semibold text-on-surface-variant">Menyinkronkan {stats?.system_status?.db || '45ms'}</p>
                             </div>
                             <span className="h-3 w-3 rounded-full bg-[#10b981]"></span>
                         </div>
                         <div className="mt-6 pt-6 border-t border-outline-variant/20">
-                            <p className="text-[12px] font-black text-on-surface-variant mb-3 uppercase tracking-widest">PARTNER ONBOARDING PIPELINE</p>
+                            <p className="text-[12px] font-black text-on-surface-variant mb-3 uppercase tracking-widest">ALUR PENDAFTARAN MITRA</p>
                             <div className="w-full bg-surface-container rounded-full h-2 mb-2">
                                 <div className="bg-primary h-2 rounded-full" style={{width: `${onboardingPercentage}%`}}></div>
                             </div>
                             <div className="flex justify-between text-[12px] font-bold text-on-surface-variant">
-                                <span>{verifiedOnboarding} Verified</span>
+                                <span>{verifiedOnboarding} Terverifikasi</span>
                                 <span>{targetOnboarding} Target</span>
                             </div>
                         </div>
@@ -185,8 +203,8 @@ const Dashboard = () => {
             <div className="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,15,34,0.05)] border border-outline-variant/20 flex flex-col overflow-hidden mb-10">
                 <div className="p-6 border-b border-outline-variant/20 flex justify-between items-center bg-surface-bright">
                     <div>
-                        <h3 className="text-[20px] font-bold text-primary">Live Monitoring</h3>
-                        <p className="text-[14px] text-on-surface-variant font-medium">Recent active bookings across network.</p>
+                        <h3 className="text-[20px] font-bold text-primary">Pemantauan Langsung (Live Monitoring)</h3>
+                        <p className="text-[14px] text-on-surface-variant font-medium">Pesanan aktif terbaru di seluruh jaringan.</p>
                     </div>
                 </div>
                 <div className="overflow-x-auto w-full">
@@ -199,9 +217,9 @@ const Dashboard = () => {
                             <thead>
                                 <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
                                     <th className="p-4 font-bold w-24">ID</th>
-                                    <th className="p-4 font-bold">Customer</th>
-                                    <th className="p-4 font-bold">Service Type</th>
-                                    <th className="p-4 font-bold">Partner Assigned</th>
+                                    <th className="p-4 font-bold">Pelanggan</th>
+                                    <th className="p-4 font-bold">Tipe Layanan</th>
+                                    <th className="p-4 font-bold">Mitra Ditugaskan</th>
                                     <th className="p-4 font-bold text-center w-32">Status</th>
                                 </tr>
                             </thead>
@@ -219,14 +237,14 @@ const Dashboard = () => {
                                                 </div>
                                             </td>
                                             <td className="p-4 text-on-surface-variant font-medium">
-                                                {row.service_category?.vehicle_type} - {row.service_category?.tire_type}
+                                                {(vehicleTypeLabels[row.service_category?.vehicle_type?.toLowerCase()] || row.service_category?.vehicle_type)} - {(tireTypeLabels[row.service_category?.tire_type?.toLowerCase()] || row.service_category?.tire_type?.replace('_', ' '))}
                                             </td>
                                             <td className="p-4 text-on-surface font-medium">
                                                 {row.mitra?.name || <span className="text-amber-600 animate-pulse font-semibold">Mencari Mekanik...</span>}
                                             </td>
                                             <td className="p-4 text-center">
                                                 <span className={`inline-block px-3 py-1 rounded-full font-bold text-[11px] whitespace-nowrap bg-secondary-container text-on-secondary-container capitalize`}>
-                                                    {row.status.replace(/_/g, ' ')}
+                                                    {statusLabels[row.status?.toLowerCase()] || row.status?.replace(/_/g, ' ')}
                                                 </span>
                                             </td>
                                         </tr>

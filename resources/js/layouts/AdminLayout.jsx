@@ -19,15 +19,15 @@ const AdminLayout = () => {
     
     const menuItems = [
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/admin' },
-        { icon: <Users size={20} />, label: 'User Management', path: '/admin/users' },
-        { icon: <ShieldCheck size={20} />, label: 'Partner Verification', path: '/admin/partners' },
-        { icon: <Wrench size={20} />, label: 'Service Content', path: '/admin/services' },
-        { icon: <BarChart3 size={20} />, label: 'Reports', path: '/admin/reports' },
+        { icon: <Users size={20} />, label: 'Manajemen Pengguna', path: '/admin/users' },
+        { icon: <ShieldCheck size={20} />, label: 'Verifikasi Mitra', path: '/admin/partners' },
+        { icon: <Wrench size={20} />, label: 'Konten Layanan', path: '/admin/services' },
+        { icon: <BarChart3 size={20} />, label: 'Laporan', path: '/admin/reports' },
     ];
 
     const bottomItems = [
-        { icon: <Settings size={20} />, label: 'Settings', path: '/admin/settings' },
-        { icon: <HelpCircle size={20} />, label: 'Support', path: '/admin/support' },
+        { icon: <Settings size={20} />, label: 'Pengaturan', path: '/admin/settings' },
+        { icon: <HelpCircle size={20} />, label: 'Dukungan', path: '/admin/support' },
     ];
 
     return (
@@ -65,7 +65,7 @@ const AdminLayout = () => {
                 <div className="p-4 flex flex-col gap-2 border-t border-outline-variant/30">
                     <button className="w-full bg-primary text-on-primary py-3 rounded-lg flex items-center justify-center gap-2 mb-2 hover:bg-primary/90 transition-colors shadow-sm font-semibold">
                         <Plus size={20} />
-                        <span>New Service Audit</span>
+                        <span>Audit Layanan Baru</span>
                     </button>
                     {bottomItems.map((item) => (
                         <Link
@@ -79,7 +79,7 @@ const AdminLayout = () => {
                     ))}
                     <button className="text-on-surface-variant hover:bg-surface-container-high rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-colors text-[14px]">
                         <LogOut size={20} />
-                        <span>Logout</span>
+                        <span>Keluar</span>
                     </button>
                 </div>
             </nav>
@@ -93,7 +93,7 @@ const AdminLayout = () => {
                             <Search size={18} className="text-outline mr-2" />
                             <input 
                                 className="bg-transparent border-none outline-none text-[14px] text-on-surface placeholder:text-outline w-64 p-0 focus:ring-0" 
-                                placeholder="Search records..." 
+                                placeholder="Cari data..." 
                                 type="text"
                             />
                         </div>

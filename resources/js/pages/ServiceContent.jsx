@@ -20,6 +20,17 @@ const ServiceContent = () => {
     const { categories, loading } = useSelector((state) => state.service);
     const [searchTerm, setSearchTerm] = useState('');
 
+    const vehicleTypeLabels = {
+        car: 'Mobil',
+        motorcycle: 'Motor'
+    };
+
+    const tireTypeLabels = {
+        tube: 'Ban Dalam',
+        tubeless: 'Tubeless'
+    };
+
+
     useEffect(() => {
         dispatch(fetchCategories());
     }, [dispatch]);
@@ -38,16 +49,16 @@ const ServiceContent = () => {
         <div className="flex flex-col gap-10 animate-in fade-in duration-500">
             {/* Page Header */}
             <div>
-                <h2 className="text-[32px] font-bold text-on-background tracking-tight">Content Management</h2>
-                <p className="text-[16px] text-on-surface-variant font-medium">Update promotional materials and standardize service pricing.</p>
+                <h2 className="text-[32px] font-bold text-on-background tracking-tight">Manajemen Konten</h2>
+                <p className="text-[16px] text-on-surface-variant font-medium">Perbarui materi promosi dan standarisasi harga layanan.</p>
             </div>
 
             {/* Promo Banners Section */}
             <div className="bg-surface-container-lowest p-8 rounded-xl shadow-[0_4px_12px_rgba(0,15,34,0.05)] border border-outline-variant/20 flex flex-col">
                 <div className="flex justify-between items-start mb-8">
                     <div>
-                        <h3 className="text-[20px] font-bold text-primary">Promo Banners</h3>
-                        <p className="text-[14px] text-on-surface-variant font-medium">Manage carousel banners for consumer app homepage.</p>
+                        <h3 className="text-[20px] font-bold text-primary">Banner Promo</h3>
+                        <p className="text-[14px] text-on-surface-variant font-medium">Kelola banner carousel untuk beranda aplikasi konsumen.</p>
                     </div>
                 </div>
                 
@@ -58,8 +69,8 @@ const ServiceContent = () => {
                             <CloudUpload size={28} />
                         </div>
                         <div className="text-center">
-                            <h4 className="text-[16px] font-bold text-primary">Click to upload or drag and drop</h4>
-                            <p className="text-[12px] font-semibold text-outline mt-1">SVG, PNG, JPG (MAX. 1200×600px)</p>
+                            <h4 className="text-[16px] font-bold text-primary">Klik untuk mengunggah atau seret dan lepas</h4>
+                            <p className="text-[12px] font-semibold text-outline mt-1">SVG, PNG, JPG (MAKS. 1200×600px)</p>
                         </div>
                     </div>
 
@@ -76,7 +87,7 @@ const ServiceContent = () => {
                                 <button className="p-2 bg-white text-error rounded-lg shadow-xl"><Trash2 size={16} /></button>
                             </div>
                             <div className="absolute top-3 right-3">
-                                <span className="px-2 py-0.5 bg-green-500 text-white text-[10px] font-black uppercase rounded-full">Live</span>
+                                <span className="px-2 py-0.5 bg-green-500 text-white text-[10px] font-black uppercase rounded-full">Aktif</span>
                             </div>
                         </div>
                     </div>
@@ -87,8 +98,8 @@ const ServiceContent = () => {
             <div className="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,15,34,0.05)] border border-outline-variant/20 flex flex-col overflow-hidden mb-10">
                 <div className="p-8 border-b border-outline-variant/20 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-surface-bright">
                     <div>
-                        <h3 className="text-[20px] font-bold text-primary">Service Categories</h3>
-                        <p className="text-[14px] text-on-surface-variant font-medium">Standard baseline pricing for all partners.</p>
+                        <h3 className="text-[20px] font-bold text-primary">Kategori Layanan</h3>
+                        <p className="text-[14px] text-on-surface-variant font-medium">Standar harga dasar untuk semua mitra.</p>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="relative w-64">
@@ -100,12 +111,12 @@ const ServiceContent = () => {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="block w-full pl-11 pr-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-xl text-[14px] placeholder:text-outline focus:ring-2 focus:ring-primary/10 transition-all" 
-                                placeholder="Search services..."
+                                placeholder="Cari layanan..."
                             />
                         </div>
                         <button className="bg-primary text-on-primary font-bold py-2.5 px-6 rounded-xl flex items-center gap-2 hover:bg-primary/90 transition-all shadow-sm active:scale-95">
                             <Plus size={18} />
-                            <span>Add New</span>
+                            <span>Tambah Baru</span>
                         </button>
                     </div>
                 </div>
@@ -119,10 +130,10 @@ const ServiceContent = () => {
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                    <th className="px-10 py-5 font-bold">Category Name</th>
-                                    <th className="px-10 py-5 font-bold">Base Pricing</th>
-                                    <th className="px-10 py-5 font-bold">Vehicle Type</th>
-                                    <th className="px-10 py-5 font-bold text-right">Action</th>
+                                    <th className="px-10 py-5 font-bold">Nama Kategori</th>
+                                    <th className="px-10 py-5 font-bold">Harga Dasar</th>
+                                    <th className="px-10 py-5 font-bold">Tipe Kendaraan</th>
+                                    <th className="px-10 py-5 font-bold text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="text-[14px] divide-y divide-outline-variant/10">
@@ -137,12 +148,12 @@ const ServiceContent = () => {
                                             </div>
                                         </td>
                                         <td className="px-10 py-6">
-                                            <span className="font-bold text-on-surface">Rp {Number(cat.base_price).toLocaleString()}</span>
+                                            <span className="font-bold text-on-surface">Rp {Number(cat.base_price).toLocaleString('id-ID')}</span>
                                         </td>
                                         <td className="px-10 py-6">
                                             <div className="flex items-center gap-2">
-                                                <span className="px-3 py-1 bg-primary-fixed text-primary rounded-lg text-[10px] font-bold uppercase tracking-wider">{cat.vehicle_type}</span>
-                                                <span className="px-3 py-1 bg-surface-container text-on-surface-variant rounded-lg text-[10px] font-bold uppercase tracking-wider">{cat.tire_type?.replace('_', ' ')}</span>
+                                                <span className="px-3 py-1 bg-primary-fixed text-primary rounded-lg text-[10px] font-bold uppercase tracking-wider">{vehicleTypeLabels[cat.vehicle_type?.toLowerCase()] || cat.vehicle_type}</span>
+                                                <span className="px-3 py-1 bg-surface-container text-on-surface-variant rounded-lg text-[10px] font-bold uppercase tracking-wider">{tireTypeLabels[cat.tire_type?.toLowerCase()] || cat.tire_type?.replace('_', ' ')}</span>
                                             </div>
                                         </td>
                                         <td className="px-10 py-6 text-right">

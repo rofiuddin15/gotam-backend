@@ -35,26 +35,26 @@ const Login = () => {
                         <Wrench size={32} />
                     </div>
                     <h1 className="text-3xl font-black text-primary tracking-tight">GoTam</h1>
-                    <p className="text-on-surface-variant font-bold text-[14px] uppercase tracking-widest mt-1">Admin Portal</p>
+                    <p className="text-on-surface-variant font-bold text-[14px] uppercase tracking-widest mt-1">Portal Admin</p>
                 </div>
 
                 {/* Login Card */}
                 <div className="bg-surface-container-lowest p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-outline-variant/20">
                     <div className="mb-8">
-                        <h2 className="text-[24px] font-bold text-primary">Welcome Back</h2>
-                        <p className="text-on-surface-variant font-medium text-[14px]">Enter your credentials to access the console.</p>
+                        <h2 className="text-[24px] font-bold text-primary">Selamat Datang Kembali</h2>
+                        <p className="text-on-surface-variant font-medium text-[14px]">Masukkan kredensial Anda untuk mengakses konsol.</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {error && (
                             <div className="p-4 bg-error-container text-on-error-container rounded-xl flex items-start gap-3 border border-error/20 animate-in slide-in-from-top-2">
                                 <AlertCircle size={20} className="shrink-0" />
-                                <p className="text-[13px] font-bold leading-tight">{error.message || 'Invalid email or password'}</p>
+                                <p className="text-[13px] font-bold leading-tight">{error.message || 'Email atau kata sandi tidak valid'}</p>
                             </div>
                         )}
 
                         <div className="space-y-2">
-                            <label className="text-[12px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Email Address</label>
+                            <label className="text-[12px] font-black text-on-surface-variant uppercase tracking-widest ml-1">Alamat Email</label>
                             <div className="relative group">
                                 <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-outline group-focus-within:text-primary transition-colors">
                                     <Mail size={18} />
@@ -65,15 +65,15 @@ const Login = () => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                     className="block w-full pl-11 pr-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl text-[14px] placeholder:text-outline focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all" 
-                                    placeholder="name@gotam.id"
+                                    placeholder="nama@gotam.id"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-center px-1">
-                                <label className="text-[12px] font-black text-on-surface-variant uppercase tracking-widest">Password</label>
-                                <button type="button" className="text-[12px] font-bold text-primary hover:underline">Forgot?</button>
+                                <label className="text-[12px] font-black text-on-surface-variant uppercase tracking-widest">Kata Sandi</label>
+                                <button type="button" className="text-[12px] font-bold text-primary hover:underline">Lupa?</button>
                             </div>
                             <div className="relative group">
                                 <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-outline group-focus-within:text-primary transition-colors">
@@ -99,7 +99,7 @@ const Login = () => {
                                 <Loader2 className="animate-spin" size={20} />
                             ) : (
                                 <>
-                                    <span>Sign In</span>
+                                    <span>Masuk</span>
                                     <ArrowRight size={20} />
                                 </>
                             )}
@@ -108,8 +108,8 @@ const Login = () => {
                 </div>
 
                 <p className="mt-8 text-center text-on-surface-variant text-[13px] font-medium">
-                    Secured by GoTam Infrastructure. <br/>
-                    Confidential and Proprietary.
+                    Diamankan oleh Infrastruktur GoTam. <br/>
+                    Rahasia dan Hak Milik.
                 </p>
             </div>
         </div>

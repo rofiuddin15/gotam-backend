@@ -52,13 +52,30 @@ const AuditLogs = () => {
         }
     };
 
+    const moduleLabels = {
+        financial: 'Keuangan',
+        users: 'Pengguna',
+        services: 'Layanan',
+        partners: 'Mitra'
+    };
+
+    const actionLabels = {
+        create: 'tambah',
+        update: 'ubah',
+        delete: 'hapus',
+        approve: 'setujui',
+        reject: 'tolak',
+        login: 'masuk',
+        logout: 'keluar'
+    };
+
     return (
         <div className="flex flex-col gap-10 animate-in fade-in duration-500">
             {/* Page Header */}
             <div className="flex justify-between items-end">
                 <div>
-                    <h2 className="text-[32px] font-bold text-on-background tracking-tight">Audit Trails</h2>
-                    <p className="text-[16px] text-on-surface-variant font-medium">Monitor all administrative activities and platform changes.</p>
+                    <h2 className="text-[32px] font-bold text-on-background tracking-tight">Riwayat Audit</h2>
+                    <p className="text-[16px] text-on-surface-variant font-medium">Pantau semua aktivitas administratif dan perubahan platform.</p>
                 </div>
             </div>
 
@@ -69,9 +86,9 @@ const AuditLogs = () => {
                         <div className="p-2.5 bg-primary-fixed text-primary rounded-xl">
                             <History size={20} />
                         </div>
-                        <h3 className="text-[20px] font-bold text-primary">System Activity Logs</h3>
+                        <h3 className="text-[20px] font-bold text-primary">Log Aktivitas Sistem</h3>
                     </div>
-                    <button className="text-[12px] font-bold text-primary hover:underline transition-colors">Export Full History</button>
+                    <button className="text-[12px] font-bold text-primary hover:underline transition-colors">Ekspor Seluruh Riwayat</button>
                 </div>
 
                 <div className="overflow-x-auto w-full">
@@ -83,12 +100,12 @@ const AuditLogs = () => {
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                    <th className="px-10 py-5 font-bold">Timestamp</th>
-                                    <th className="px-10 py-5 font-bold">Actor</th>
-                                    <th className="px-10 py-5 font-bold">Module</th>
-                                    <th className="px-10 py-5 font-bold">Action</th>
-                                    <th className="px-10 py-5 font-bold">Description</th>
-                                    <th className="px-10 py-5 font-bold text-right">Details</th>
+                                    <th className="px-10 py-5 font-bold">Waktu</th>
+                                    <th className="px-10 py-5 font-bold">Aktor</th>
+                                    <th className="px-10 py-5 font-bold">Modul</th>
+                                    <th className="px-10 py-5 font-bold">Tindakan</th>
+                                    <th className="px-10 py-5 font-bold">Keterangan</th>
+                                    <th className="px-10 py-5 font-bold text-right">Detail</th>
                                 </tr>
                             </thead>
                             <tbody className="text-[14px] divide-y divide-outline-variant/10">
@@ -105,18 +122,20 @@ const AuditLogs = () => {
                                                 <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-outline">
                                                     <User size={14} />
                                                 </div>
-                                                <span className="font-bold text-primary">{log.user?.name || 'System Auto'}</span>
+                                                <span className="font-bold text-primary">{log.user?.name || 'Sistem Otomatis'}</span>
                                             </div>
                                         </td>
                                         <td className="px-10 py-6">
                                             <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${getModuleColor(log.module)}`}>
-                                                {log.module}
+                                                {moduleLabels[log.module.toLowerCase()] || log.module}
                                             </span>
                                         </td>
                                         <td className="px-10 py-6">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-1.5 h-1.5 bg-secondary rounded-full"></div>
-                                                <span className="font-bold text-on-surface capitalize">{log.action}</span>
+                                                <span className="font-bold text-on-surface capitalize">
+                                                    {actionLabels[log.action.toLowerCase()] || log.action}
+                                                </span>
                                             </div>
                                         </td>
                                         <td className="px-10 py-6">
@@ -140,7 +159,7 @@ const AuditLogs = () => {
                 {pagination && (
                     <div className="p-8 border-t border-outline-variant/20 flex items-center justify-between bg-surface-bright">
                         <p className="text-[12px] font-bold text-on-surface-variant">
-                            Page <span className="text-primary">{pagination.current_page}</span> of {pagination.last_page}
+                            Halaman <span className="text-primary">{pagination.current_page}</span> dari {pagination.last_page}
                         </p>
                         <div className="flex items-center gap-2">
                             <button 
