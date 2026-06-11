@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
+    // use WithoutModelEvents;
 
     /**
      * Seed the application's database.
@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             ServiceCategorySeeder::class,
+            UserSeeder::class,
             // \Laravolt\Indonesia\Seeds\DatabaseSeeder::class, // Call this separately if needed due to size
         ]);
 

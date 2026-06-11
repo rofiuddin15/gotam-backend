@@ -153,27 +153,29 @@ class BookingController extends Controller
         return response()->json(['message' => 'Status diperbarui: Sedang diperbaiki.', 'booking' => $booking]);
     }
 
-    /**
-     * Mark booking as completed
-     */
-    public function complete(Booking $booking, FinancialService $financialService)
+    public function complete(Request $request, Booking $booking, FinancialService $financialService)
     {
         if ($booking->status !== 'repairing') {
             return response()->json(['message' => 'Hanya pesanan dalam perbaikan yang bisa diselesaikan.'], 422);
         }
 
-        $booking->update(['status' => 'completed']);
+        $paymentMethod = $request->input('payment_method', 'Tunai');
 
-        // Record Status Log
-        $booking->logStatus('completed', 'Pesanan telah selesai. Terima kasih telah menggunakan GoTam!');
+        try {
+            $financialService->settleBooking($booking, $paymentMethod);
 
-        // Process financial settlement
-        $financialService->settleBooking($booking);
+            $booking->update(['status' => 'completed']);
 
-        return response()->json([
-            'message' => 'Pesanan telah selesai. Saldo telah diteruskan ke dompet mekanik.',
-            'booking' => $booking
-        ]);
+            // Record Status Log
+            $booking->logStatus('completed', 'Pesanan telah selesai. Terima kasih telah menggunakan GoTam!');
+
+            return response()->json([
+                'message' => 'Pesanan telah selesai. Saldo/komisi telah disesuaikan.',
+                'booking' => $booking->load(['customer', 'mitra', 'serviceCategory'])
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
 
     /**

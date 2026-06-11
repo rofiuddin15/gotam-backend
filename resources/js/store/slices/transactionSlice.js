@@ -25,11 +25,36 @@ export const approveWithdrawal = createAsyncThunk(
     }
 );
 
+export const rejectWithdrawal = createAsyncThunk(
+    'transaction/rejectWithdrawal',
+    async ({ id, admin_notes }, { rejectWithValue }) => {
+        try {
+            const response = await api.post(`/admin/withdrawals/${id}/reject`, { admin_notes });
+            return id;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const fetchFinancialReports = createAsyncThunk(
+    'transaction/fetchFinancialReports',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await api.get('/admin/reports/financial');
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 const transactionSlice = createSlice({
     name: 'transaction',
     initialState: {
         withdrawals: [],
         earnings: null,
+        financialReport: null,
         loading: false,
         error: null
     },
@@ -49,6 +74,20 @@ const transactionSlice = createSlice({
             })
             .addCase(approveWithdrawal.fulfilled, (state, action) => {
                 state.withdrawals = state.withdrawals.filter(w => w.id !== action.payload);
+            })
+            .addCase(rejectWithdrawal.fulfilled, (state, action) => {
+                state.withdrawals = state.withdrawals.filter(w => w.id !== action.payload);
+            })
+            .addCase(fetchFinancialReports.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(fetchFinancialReports.fulfilled, (state, action) => {
+                state.loading = false;
+                state.financialReport = action.payload;
+            })
+            .addCase(fetchFinancialReports.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
             });
     }
 });

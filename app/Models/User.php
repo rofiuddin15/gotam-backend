@@ -25,6 +25,14 @@ class User extends Authenticatable
                 'balance' => 0,
                 'currency' => 'IDR'
             ]);
+
+            if ($user->role === 'partner') {
+                $user->mitraProfile()->create([
+                    'vehicle_type_capability' => 'Motor, Mobil',
+                    'is_mobile' => true,
+                    'status_verified' => false,
+                ]);
+            }
         });
     }
 

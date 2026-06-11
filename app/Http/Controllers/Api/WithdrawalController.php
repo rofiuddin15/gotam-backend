@@ -112,4 +112,51 @@ class WithdrawalController extends Controller
 
         return response()->json(['message' => 'Penarikan dana telah disetujui.']);
     }
+
+    /**
+     * Admin: Reject withdrawal request and refund wallet balance
+     */
+    public function reject(Request $request, Withdrawal $withdrawal)
+    {
+        $request->validate([
+            'admin_notes' => 'required|string',
+        ]);
+
+        if ($withdrawal->status !== 'pending') {
+            return response()->json(['message' => 'Permintaan sudah diproses sebelumnya.'], 422);
+        }
+
+        return DB::transaction(function () use ($request, $withdrawal) {
+            $withdrawal->update([
+                'status' => 'rejected',
+                'processed_at' => now(),
+                'admin_notes' => $request->admin_notes
+            ]);
+
+            $user = $withdrawal->user;
+            $wallet = $user->wallet;
+            if ($wallet) {
+                $wallet->increment('balance', $withdrawal->amount);
+
+                WalletTransaction::create([
+                    'wallet_id' => $wallet->id,
+                    'type' => 'deposit',
+                    'amount' => $withdrawal->amount,
+                    'description' => "Pengembalian dana (Refund) akibat penarikan dana ditolak. Alasan: {$request->admin_notes}",
+                    'reference_type' => Withdrawal::class,
+                    'reference_id' => $withdrawal->id,
+                ]);
+            }
+
+            LogService::log(
+                'Financial',
+                'REJECT_WITHDRAWAL',
+                "Menolak penarikan dana Pengguna ID: {$withdrawal->user_id} sebesar Rp " . number_format($withdrawal->amount) . ". Alasan: {$request->admin_notes}",
+                ['status' => 'pending'],
+                ['status' => 'rejected']
+            );
+
+            return response()->json(['message' => 'Penarikan dana ditolak dan dana dikembalikan ke dompet pengguna.']);
+        });
+    }
 }

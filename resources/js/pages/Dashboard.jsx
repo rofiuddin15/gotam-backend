@@ -12,15 +12,25 @@ import {
     Database,
     Loader2
 } from 'lucide-react';
-import { fetchDashboardStats } from '../store/slices/dashboardSlice';
+import { fetchDashboardStats, fetchLiveMonitoring } from '../store/slices/dashboardSlice';
 
 const Dashboard = () => {
     const dispatch = useDispatch();
-    const { stats, loading } = useSelector((state) => state.dashboard);
+    const { stats, monitoring, loading } = useSelector((state) => state.dashboard);
 
     useEffect(() => {
         dispatch(fetchDashboardStats());
+        dispatch(fetchLiveMonitoring());
     }, [dispatch]);
+
+    // Calculate chart data properties
+    const chartData = stats?.revenue_chart || [];
+    const maxChartValue = Math.max(...chartData.map(d => Number(d.value) || 0), 1);
+    
+    // Onboarding progress
+    const verifiedOnboarding = stats?.onboarding?.verified || 0;
+    const targetOnboarding = stats?.onboarding?.target || 100;
+    const onboardingPercentage = Math.min((verifiedOnboarding / targetOnboarding) * 100, 100);
 
     return (
         <div className="flex flex-col gap-10">
@@ -38,11 +48,10 @@ const Dashboard = () => {
                         <div className="h-10 w-10 rounded-lg bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
                             <Receipt size={20} />
                         </div>
-                        <span className="bg-surface-container p-1 rounded text-primary text-[12px] font-bold">+5.2%</span>
                     </div>
                     <div>
                         <p className="text-[14px] text-on-surface-variant font-medium">Total Transactions</p>
-                        <p className="text-[24px] font-bold text-primary mt-1">{stats?.total_transactions?.toLocaleString() || '1,420'}</p>
+                        <p className="text-[24px] font-bold text-primary mt-1">{stats?.stats?.total_transactions || '0'}</p>
                     </div>
                 </div>
 
@@ -53,11 +62,10 @@ const Dashboard = () => {
                         <div className="h-10 w-10 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container">
                             <Wallet size={20} />
                         </div>
-                        <span className="bg-secondary p-1 rounded text-on-secondary text-[12px] font-bold">+12.4%</span>
                     </div>
                     <div className="relative z-10">
-                        <p className="text-[14px] text-primary-fixed-dim font-medium">Total Revenue</p>
-                        <p className="text-[24px] font-bold text-on-primary mt-1">Rp {stats?.total_revenue?.toLocaleString() || '124.5M'}</p>
+                        <p className="text-[14px] text-primary-fixed-dim font-medium">Platform Revenue</p>
+                        <p className="text-[24px] font-bold text-on-primary mt-1">{stats?.stats?.total_revenue || 'Rp 0'}</p>
                     </div>
                 </div>
 
@@ -67,11 +75,10 @@ const Dashboard = () => {
                         <div className="h-10 w-10 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant">
                             <Wrench size={20} />
                         </div>
-                        <span className="bg-error-container text-on-error-container p-1 rounded text-[12px] font-bold">-2.1%</span>
                     </div>
                     <div>
                         <p className="text-[14px] text-on-surface-variant font-medium">Active Bookings</p>
-                        <p className="text-[24px] font-bold text-primary mt-1">{stats?.active_bookings || '84'}</p>
+                        <p className="text-[24px] font-bold text-primary mt-1">{stats?.stats?.active_bookings ?? '0'}</p>
                     </div>
                 </div>
 
@@ -81,11 +88,10 @@ const Dashboard = () => {
                         <div className="h-10 w-10 rounded-lg bg-tertiary-container flex items-center justify-center text-on-tertiary-container">
                             <Handshake size={20} />
                         </div>
-                        <span className="bg-surface-container p-1 rounded text-primary text-[12px] font-bold">+8.0%</span>
                     </div>
                     <div>
-                        <p className="text-[14px] text-on-surface-variant font-medium">New Partners</p>
-                        <p className="text-[24px] font-bold text-primary mt-1">{stats?.total_partners || '24'}</p>
+                        <p className="text-[14px] text-on-surface-variant font-medium">New Partners (30d)</p>
+                        <p className="text-[24px] font-bold text-primary mt-1">{stats?.stats?.new_partners ?? '0'}</p>
                     </div>
                 </div>
             </div>
@@ -96,12 +102,9 @@ const Dashboard = () => {
                 <div className="lg:col-span-2 bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_12px_rgba(0,15,34,0.05)] border border-outline-variant/20 flex flex-col">
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h3 className="text-[20px] font-bold text-primary">Monthly Revenue</h3>
-                            <p className="text-[14px] text-on-surface-variant font-medium">Year to date performance</p>
+                            <h3 className="text-[20px] font-bold text-primary">Monthly Revenue Trend</h3>
+                            <p className="text-[14px] text-on-surface-variant font-medium">Recent booking transactions</p>
                         </div>
-                        <button className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-semibold text-[14px]">
-                            Last 6 Months <ChevronDown size={16} />
-                        </button>
                     </div>
                     
                     {/* Visual Chart Placeholder */}
@@ -109,23 +112,33 @@ const Dashboard = () => {
                         <div className="absolute inset-0 flex flex-col justify-between">
                             {[1, 2, 3, 4].map(i => <div key={i} className="border-t border-outline-variant/10 w-full flex-1"></div>)}
                         </div>
-                        {[
-                            { h: '40%', active: false },
-                            { h: '55%', active: false },
-                            { h: '45%', active: false },
-                            { h: '70%', active: false },
-                            { h: '60%', active: true },
-                            { h: '85%', active: true },
-                        ].map((bar, i) => (
-                            <div 
-                                key={i} 
-                                className={`w-[12%] rounded-t-sm transition-all relative group z-10 ${bar.active ? 'bg-gradient-to-t from-secondary-container to-transparent border-t-2 border-secondary' : 'bg-gradient-to-t from-primary-fixed to-transparent'}`} 
-                                style={{height: bar.h}}
-                            ></div>
-                        ))}
+                        {chartData.length > 0 ? (
+                            chartData.map((bar, i) => {
+                                const value = Number(bar.value) || 0;
+                                const heightPercentage = (value / maxChartValue) * 85;
+                                return (
+                                    <div 
+                                        key={i} 
+                                        className="w-[12%] rounded-t-sm transition-all relative group z-10 bg-gradient-to-t from-primary to-transparent hover:from-primary-fixed-dim" 
+                                        style={{ height: `${Math.max(heightPercentage, 8)}%` }}
+                                        title={`${bar.name}: Rp ${value.toLocaleString('id-ID')}`}
+                                    >
+                                        <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                            Rp {value.toLocaleString('id-ID')}
+                                        </span>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <div className="absolute inset-0 flex items-center justify-center text-on-surface-variant text-[14px] font-bold">
+                                Tidak ada data chart bulanan
+                            </div>
+                        )}
                         {/* X Axis Labels */}
                         <div className="absolute -bottom-6 w-full flex justify-between px-2 text-[12px] text-on-surface-variant font-bold">
-                            {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map(m => <span key={m}>{m}</span>)}
+                            {chartData.map((bar, i) => (
+                                <span key={i} style={{ width: '12%', textAlign: 'center' }}>{bar.name}</span>
+                            ))}
                         </div>
                     </div>
                 </div>
@@ -140,7 +153,7 @@ const Dashboard = () => {
                             </div>
                             <div className="flex-1">
                                 <p className="text-[14px] font-bold text-on-surface">Core API Services</p>
-                                <p className="text-[12px] font-semibold text-on-surface-variant">99.98% Uptime</p>
+                                <p className="text-[12px] font-semibold text-on-surface-variant">{stats?.system_status?.api || '99.9%'}</p>
                             </div>
                             <span className="h-3 w-3 rounded-full bg-[#10b981]"></span>
                         </div>
@@ -150,18 +163,18 @@ const Dashboard = () => {
                             </div>
                             <div className="flex-1">
                                 <p className="text-[14px] font-bold text-on-surface">Partner Sync DB</p>
-                                <p className="text-[12px] font-semibold text-on-surface-variant">Syncing 45ms</p>
+                                <p className="text-[12px] font-semibold text-on-surface-variant">Syncing {stats?.system_status?.db || '45ms'}</p>
                             </div>
                             <span className="h-3 w-3 rounded-full bg-[#10b981]"></span>
                         </div>
                         <div className="mt-6 pt-6 border-t border-outline-variant/20">
                             <p className="text-[12px] font-black text-on-surface-variant mb-3 uppercase tracking-widest">PARTNER ONBOARDING PIPELINE</p>
                             <div className="w-full bg-surface-container rounded-full h-2 mb-2">
-                                <div className="bg-primary h-2 rounded-full" style={{width: '65%'}}></div>
+                                <div className="bg-primary h-2 rounded-full" style={{width: `${onboardingPercentage}%`}}></div>
                             </div>
                             <div className="flex justify-between text-[12px] font-bold text-on-surface-variant">
-                                <span>65 Verified</span>
-                                <span>100 Target</span>
+                                <span>{verifiedOnboarding} Verified</span>
+                                <span>{targetOnboarding} Target</span>
                             </div>
                         </div>
                     </div>
@@ -175,57 +188,59 @@ const Dashboard = () => {
                         <h3 className="text-[20px] font-bold text-primary">Live Monitoring</h3>
                         <p className="text-[14px] text-on-surface-variant font-medium">Recent active bookings across network.</p>
                     </div>
-                    <button className="text-primary hover:bg-primary-fixed px-4 py-2 rounded-lg font-bold text-[14px] transition-colors flex items-center gap-2 border border-primary active:scale-95">
-                        <Filter size={16} /> Filter
-                    </button>
                 </div>
                 <div className="overflow-x-auto w-full">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                <th className="p-4 font-bold w-24">ID</th>
-                                <th className="p-4 font-bold">Customer</th>
-                                <th className="p-4 font-bold">Service Type</th>
-                                <th className="p-4 font-bold">Partner Assigned</th>
-                                <th className="p-4 font-bold text-center w-32">Status</th>
-                                <th className="p-4 font-bold text-right w-20">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="text-[14px] divide-y divide-outline-variant/10">
-                            {[
-                                { id: '#BK-9021', name: 'Ahmad Surya', type: 'Darurat - Mogok', partner: 'Auto Jaya Motor', status: 'Menuju Lokasi', statusColor: 'bg-secondary-container text-on-secondary-container' },
-                                { id: '#BK-9020', name: 'Budi Wijaya', type: 'Servis Berkala 10k', partner: 'Berkah Mandiri', status: 'Dikerjakan', statusColor: 'bg-primary-fixed text-primary' },
-                                { id: '#BK-9018', name: 'Citra Dewi', type: 'Ganti Oli & Filter', partner: 'Maju Mapan Auto', status: 'Dikerjakan', statusColor: 'bg-primary-fixed text-primary' },
-                            ].map((row, i) => (
-                                <tr key={i} className="hover:bg-surface-container-low transition-colors group">
-                                    <td className="p-4 font-bold text-primary">{row.id}</td>
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-8 w-8 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center font-bold text-xs">
-                                                {row.name.split(' ').map(n => n[0]).join('')}
-                                            </div>
-                                            <span className="text-on-surface font-semibold">{row.name}</span>
-                                        </div>
-                                    </td>
-                                    <td className="p-4 text-on-surface-variant font-medium">{row.type}</td>
-                                    <td className="p-4 text-on-surface font-medium">{row.partner}</td>
-                                    <td className="p-4 text-center">
-                                        <span className={`inline-block px-3 py-1 rounded-full font-bold text-[11px] whitespace-nowrap ${row.statusColor}`}>
-                                            {row.status}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 text-right">
-                                        <button className="text-on-surface-variant hover:text-primary transition-colors">
-                                            <MoreVertical size={18} />
-                                        </button>
-                                    </td>
+                    {loading && monitoring.length === 0 ? (
+                        <div className="py-20 flex justify-center">
+                            <Loader2 className="animate-spin text-secondary-container" size={32} />
+                        </div>
+                    ) : (
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
+                                    <th className="p-4 font-bold w-24">ID</th>
+                                    <th className="p-4 font-bold">Customer</th>
+                                    <th className="p-4 font-bold">Service Type</th>
+                                    <th className="p-4 font-bold">Partner Assigned</th>
+                                    <th className="p-4 font-bold text-center w-32">Status</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                <div className="p-4 bg-surface-bright border-t border-outline-variant/20 flex justify-center">
-                    <button className="text-primary font-bold text-[14px] hover:underline active:scale-95 transition-all">View All Active Bookings</button>
+                            </thead>
+                            <tbody className="text-[14px] divide-y divide-outline-variant/10">
+                                {monitoring.length > 0 ? (
+                                    monitoring.map((row, i) => (
+                                        <tr key={i} className="hover:bg-surface-container-low transition-colors group">
+                                            <td className="p-4 font-bold text-primary">#BK-{row.id}</td>
+                                            <td className="p-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-8 w-8 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center font-bold text-xs">
+                                                        {row.customer?.name?.charAt(0) || 'C'}
+                                                    </div>
+                                                    <span className="text-on-surface font-semibold">{row.customer?.name}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-4 text-on-surface-variant font-medium">
+                                                {row.service_category?.vehicle_type} - {row.service_category?.tire_type}
+                                            </td>
+                                            <td className="p-4 text-on-surface font-medium">
+                                                {row.mitra?.name || <span className="text-amber-600 animate-pulse font-semibold">Mencari Mekanik...</span>}
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <span className={`inline-block px-3 py-1 rounded-full font-bold text-[11px] whitespace-nowrap bg-secondary-container text-on-secondary-container capitalize`}>
+                                                    {row.status.replace(/_/g, ' ')}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="5" className="p-10 text-center text-on-surface-variant font-bold">
+                                            Tidak ada pesanan aktif saat ini.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </div>
         </div>

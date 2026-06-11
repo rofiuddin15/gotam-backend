@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\PartnerServiceController;
 use App\Http\Controllers\Api\ServiceCategoryController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\ActivityLogController;
+use App\Http\Controllers\Api\WalletController;
+use App\Http\Controllers\Api\ReportController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -37,6 +39,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/partner/withdrawals', [WithdrawalController::class, 'history']);
     Route::apiResource('/partner/catalog', PartnerServiceController::class);
 
+    // Wallet Routes
+    Route::post('/wallet/topup', [WalletController::class, 'topup']);
+    Route::get('/wallet/balance', [WalletController::class, 'balance']);
+    Route::post('/wallet/withdraw', [WithdrawalController::class, 'store']);
+
     // Admin Routes
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/stats', [StatsController::class, 'dashboardStats']);
@@ -52,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Withdrawal Management
         Route::get('/admin/withdrawals/pending', [WithdrawalController::class, 'pending']);
         Route::post('/admin/withdrawals/{withdrawal}/approve', [WithdrawalController::class, 'approve']);
+        Route::post('/admin/withdrawals/{withdrawal}/reject', [WithdrawalController::class, 'reject']);
 
         // Global Service Categories
         Route::apiResource('/admin/service-categories', ServiceCategoryController::class);
@@ -65,5 +73,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Audit Trails
         Route::get('/admin/logs', [ActivityLogController::class, 'index']);
+
+        // Reports Management
+        Route::get('/admin/reports/financial', [ReportController::class, 'financialReport']);
+        Route::get('/admin/reports/users', [ReportController::class, 'userReport']);
     });
 });

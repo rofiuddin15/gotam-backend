@@ -13,19 +13,31 @@ import {
     Banknote,
     TrendingUp
 } from 'lucide-react';
-import { fetchPendingWithdrawals, approveWithdrawal } from '../store/slices/transactionSlice';
+import { fetchPendingWithdrawals, approveWithdrawal, rejectWithdrawal, fetchFinancialReports } from '../store/slices/transactionSlice';
 
 const FinancialReports = () => {
     const dispatch = useDispatch();
-    const { withdrawals, loading } = useSelector((state) => state.transaction);
+    const { withdrawals, financialReport, loading } = useSelector((state) => state.transaction);
 
     useEffect(() => {
         dispatch(fetchPendingWithdrawals());
+        dispatch(fetchFinancialReports());
     }, [dispatch]);
 
     const handleApprove = (id) => {
         if (confirm('Apakah Anda yakin ingin menyetujui penarikan dana ini?')) {
-            dispatch(approveWithdrawal(id));
+            dispatch(approveWithdrawal(id)).then(() => {
+                dispatch(fetchFinancialReports());
+            });
+        }
+    };
+
+    const handleReject = (id) => {
+        const reason = prompt('Masukkan alasan penolakan penarikan dana ini (Refund otomatis):');
+        if (reason) {
+            dispatch(rejectWithdrawal({ id, admin_notes: reason })).then(() => {
+                dispatch(fetchFinancialReports());
+            });
         }
     };
 
@@ -34,21 +46,22 @@ const FinancialReports = () => {
             {/* Page Header */}
             <div className="flex justify-between items-end">
                 <div>
-                    <h2 className="text-[32px] font-bold text-on-background tracking-tight">Financial Reports</h2>
-                    <p className="text-[16px] text-on-surface-variant font-medium">Manage payouts, track platform revenue, and monitor cashflow.</p>
+                    <h2 className="text-[32px] font-bold text-on-background tracking-tight">Financial Reports & Ledger</h2>
+                    <p className="text-[16px] text-on-surface-variant font-medium">Manage payouts, track platform revenue, and monitor company ledger sheets.</p>
                 </div>
                 <button className="flex items-center gap-2 text-primary hover:bg-primary-fixed px-6 py-3 rounded-xl font-bold text-[14px] transition-colors border border-primary active:scale-95">
                     <Download size={20} />
-                    <span>Download Report</span>
+                    <span>Download Ledger</span>
                 </button>
             </div>
 
             {/* Financial Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {[
-                    { label: 'Platform Revenue', value: 'Rp 45.2M', icon: <TrendingUp className="text-green-600" />, color: 'bg-green-50' },
-                    { label: 'Total Payouts', value: 'Rp 12.8M', icon: <Banknote className="text-blue-600" />, color: 'bg-blue-50' },
-                    { label: 'Pending Payouts', value: `Rp ${withdrawals.reduce((acc, w) => acc + Number(w.amount), 0).toLocaleString()}`, icon: <Clock className="text-amber-600" />, color: 'bg-amber-50' },
+                    { label: 'Platform Net Commission', value: financialReport?.income_statement?.platform_commission_formatted || 'Rp 0', icon: <TrendingUp className="text-green-600" />, color: 'bg-green-50' },
+                    { label: 'Total Withdrawals', value: financialReport?.balance_sheet?.total_withdrawals_formatted || 'Rp 0', icon: <Banknote className="text-blue-600" />, color: 'bg-blue-50' },
+                    { label: 'Held Wallet Balances (Liability)', value: financialReport?.balance_sheet?.held_user_balances_liability_formatted || 'Rp 0', icon: <CreditCard className="text-amber-600" />, color: 'bg-amber-50' },
+                    { label: 'Simulated Bank Cash', value: financialReport?.balance_sheet?.simulated_bank_balance_formatted || 'Rp 0', icon: <ArrowUpRight className="text-purple-600" />, color: 'bg-purple-50' },
                 ].map((stat, i) => (
                     <div key={i} className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/20 shadow-sm">
                         <div className="flex items-center gap-4">
@@ -56,8 +69,8 @@ const FinancialReports = () => {
                                 {stat.icon}
                             </div>
                             <div>
-                                <p className="text-[12px] font-black text-on-surface-variant uppercase tracking-widest">{stat.label}</p>
-                                <p className="text-[20px] font-bold text-primary mt-1">{stat.value}</p>
+                                <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest leading-none">{stat.label}</p>
+                                <p className="text-[18px] font-bold text-primary mt-1.5 whitespace-nowrap">{stat.value}</p>
                             </div>
                         </div>
                     </div>
@@ -86,7 +99,7 @@ const FinancialReports = () => {
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                    <th className="px-10 py-5 font-bold">Partner Name</th>
+                                    <th className="px-10 py-5 font-bold">User/Partner Name</th>
                                     <th className="px-10 py-5 font-bold">Amount</th>
                                     <th className="px-10 py-5 font-bold">Bank Details</th>
                                     <th className="px-10 py-5 font-bold">Request Date</th>
@@ -103,12 +116,12 @@ const FinancialReports = () => {
                                                 </div>
                                                 <div>
                                                     <p className="font-bold text-primary leading-tight">{item.user?.name}</p>
-                                                    <p className="text-[12px] font-semibold text-on-surface-variant mt-0.5">{item.user?.email}</p>
+                                                    <p className="text-[12px] font-semibold text-on-surface-variant mt-0.5">{item.user?.email} • <span className="capitalize">{item.user?.role}</span></p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-10 py-6">
-                                            <span className="font-bold text-[16px] text-primary">Rp {Number(item.amount).toLocaleString()}</span>
+                                            <span className="font-bold text-[16px] text-primary">Rp {Number(item.amount).toLocaleString('id-ID')}</span>
                                         </td>
                                         <td className="px-10 py-6">
                                             <p className="font-bold text-on-surface">{item.bank_name}</p>
@@ -121,12 +134,20 @@ const FinancialReports = () => {
                                             </div>
                                         </td>
                                         <td className="px-10 py-6 text-right">
-                                            <button 
-                                                onClick={() => handleApprove(item.id)}
-                                                className="px-6 py-2.5 bg-secondary-container text-on-secondary-container rounded-lg text-[12px] font-bold hover:bg-secondary hover:text-white transition-all active:scale-95 shadow-sm"
-                                            >
-                                                Process Payout
-                                            </button>
+                                            <div className="flex gap-2 justify-end">
+                                                <button 
+                                                    onClick={() => handleApprove(item.id)}
+                                                    className="px-4 py-2.5 bg-green-600 text-white rounded-lg text-[12px] font-bold hover:bg-green-700 transition-all active:scale-95 shadow-sm"
+                                                >
+                                                    Approve
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleReject(item.id)}
+                                                    className="px-4 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-lg text-[12px] font-bold hover:bg-red-600 hover:text-white transition-all active:scale-95 shadow-sm"
+                                                >
+                                                    Reject
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
