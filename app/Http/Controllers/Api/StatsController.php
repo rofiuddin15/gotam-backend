@@ -15,8 +15,8 @@ class StatsController extends Controller
 {
     public function dashboardStats()
     {
-        $totalTransactions = Transaction::where('status', 'success')->count();
-        $totalRevenue = Transaction::where('status', 'success')->sum('amount');
+        $totalTransactions = \App\Models\WalletTransaction::count();
+        $platformRevenue = \App\Models\PlatformEarning::sum('platform_commission');
         $activeBookings = Booking::whereIn('status', ['searching', 'heading_to_location', 'repairing'])->count();
         
         // Count partners using role or simple role column
@@ -30,9 +30,8 @@ class StatsController extends Controller
         $monthFormat = $isSqlite ? "strftime('%m', created_at)" : "MONTH(created_at)";
         $monthNameFormat = $isSqlite ? "strftime('%m', created_at)" : "DATE_FORMAT(created_at, '%b')";
 
-        $monthlyRevenueRaw = Transaction::where('status', 'success')
-            ->select(
-                DB::raw('SUM(amount) as value'),
+        $monthlyRevenueRaw = \App\Models\PlatformEarning::select(
+                DB::raw('SUM(platform_commission) as value'),
                 DB::raw("$monthFormat as month_num"),
                 DB::raw("$monthNameFormat as name")
             )
@@ -55,7 +54,7 @@ class StatsController extends Controller
         return response()->json([
             'stats' => [
                 'total_transactions' => number_format($totalTransactions),
-                'total_revenue' => 'Rp ' . number_format($totalRevenue / 1000000, 1) . 'M',
+                'total_revenue' => 'Rp ' . number_format($platformRevenue, 2, ',', '.'),
                 'active_bookings' => $activeBookings,
                 'new_partners' => $newPartners,
             ],

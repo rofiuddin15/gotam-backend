@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { 
+    useReactTable,
+    getCoreRowModel
+} from '@tanstack/react-table';
+import { 
     Download, 
-    Filter, 
     CreditCard, 
     ArrowUpRight, 
-    ArrowDownLeft,
-    CheckCircle2,
-    Clock,
-    XCircle,
-    Loader2,
-    Banknote,
-    TrendingUp,
-    Search
+    CheckCircle2, 
+    Clock, 
+    XCircle, 
+    Loader2, 
+    Banknote, 
+    TrendingUp, 
+    Search, 
+    RefreshCw
 } from 'lucide-react';
 import { 
     fetchPendingWithdrawals, 
@@ -20,8 +23,18 @@ import {
     rejectWithdrawal, 
     fetchFinancialReports,
     fetchCashFlow,
-    fetchWithdrawalsReport
+    fetchWithdrawalsReport,
+    setCashFlowParams,
+    setWithdrawalsParams,
+    setDepositParams,
+    invalidateCache
 } from '../store/slices/transactionSlice';
+
+// Base Components imports
+import Button from '../components/Button';
+import Card from '../components/Card';
+import Badge from '../components/Badge';
+import Table from '../components/Table';
 
 const FinancialReports = () => {
     const dispatch = useDispatch();
@@ -32,26 +45,25 @@ const FinancialReports = () => {
         financialReport, 
         cashFlowData, 
         withdrawalsReportData, 
-        loading 
+        loading,
+        
+        // Cache Flags
+        payoutsFetched,
+        cashFlowFetched,
+        depositsFetched,
+        withdrawalsReportFetched,
+
+        // Query parameters
+        cashFlowParams,
+        withdrawalsParams,
+        depositParams
     } = useSelector((state) => state.transaction);
 
     // Active tab state: 'payouts', 'cash-flow', 'deposits', 'withdrawals'
     const [activeTab, setActiveTab] = useState('payouts');
-
-    // Filter states
-    const [cashFlowPage, setCashFlowPage] = useState(1);
-    const [cfSearchInput, setCfSearchInput] = useState('');
-    const [cashFlowSearch, setCashFlowSearch] = useState('');
-    const [cashFlowType, setCashFlowType] = useState('');
-
-    const [depositPage, setDepositPage] = useState(1);
-    const [depSearchInput, setDepSearchInput] = useState('');
-    const [depositSearch, setDepositSearch] = useState('');
-
-    const [withdrawalsPage, setWithdrawalsPage] = useState(1);
-    const [wSearchInput, setWSearchInput] = useState('');
-    const [withdrawalsSearch, setWithdrawalsSearch] = useState('');
-    const [withdrawalsStatus, setWithdrawalsStatus] = useState('');
+    
+    // Local search input
+    const [searchInput, setSearchInput] = useState('');
 
     // Fetch initial Overview Cards & Payout Requests
     useEffect(() => {
@@ -60,65 +72,53 @@ const FinancialReports = () => {
 
     // Reactively fetch data when active tab or filters change
     useEffect(() => {
-        if (activeTab === 'payouts') {
+        if (activeTab === 'payouts' && !payoutsFetched) {
             dispatch(fetchPendingWithdrawals());
-        } else if (activeTab === 'cash-flow') {
-            dispatch(fetchCashFlow({ 
-                page: cashFlowPage, 
-                search: cashFlowSearch, 
-                type: cashFlowType 
-            }));
-        } else if (activeTab === 'deposits') {
-            dispatch(fetchCashFlow({ 
-                page: depositPage, 
-                search: depositSearch, 
-                type: 'deposit' 
-            }));
-        } else if (activeTab === 'withdrawals') {
-            dispatch(fetchWithdrawalsReport({ 
-                page: withdrawalsPage, 
-                search: withdrawalsSearch, 
-                status: withdrawalsStatus 
-            }));
+        } else if (activeTab === 'cash-flow' && !cashFlowFetched) {
+            dispatch(fetchCashFlow(cashFlowParams));
+        } else if (activeTab === 'deposits' && !depositsFetched) {
+            dispatch(fetchCashFlow({ ...depositParams, type: 'deposit' }));
+        } else if (activeTab === 'withdrawals' && !withdrawalsReportFetched) {
+            dispatch(fetchWithdrawalsReport(withdrawalsParams));
         }
     }, [
         dispatch, 
         activeTab, 
-        cashFlowPage, 
-        cashFlowSearch, 
-        cashFlowType, 
-        depositPage, 
-        depositSearch, 
-        withdrawalsPage, 
-        withdrawalsSearch, 
-        withdrawalsStatus
+        payoutsFetched,
+        cashFlowFetched,
+        depositsFetched,
+        withdrawalsReportFetched,
+        cashFlowParams,
+        withdrawalsParams,
+        depositParams
     ]);
+
+    // Sync local search input with redux parameters
+    useEffect(() => {
+        if (activeTab === 'cash-flow') {
+            setSearchInput(cashFlowParams.search);
+        } else if (activeTab === 'deposits') {
+            setSearchInput(depositParams.search);
+        } else if (activeTab === 'withdrawals') {
+            setSearchInput(withdrawalsParams.search);
+        } else {
+            setSearchInput('');
+        }
+    }, [activeTab, cashFlowParams.search, depositParams.search, withdrawalsParams.search]);
 
     const handleTabChange = (tabId) => {
         setActiveTab(tabId);
-        // Reset pages and searches on tab change to prevent overlaps
-        setCfSearchInput('');
-        setDepSearchInput('');
-        setWSearchInput('');
-        setCashFlowSearch('');
-        setDepositSearch('');
-        setWithdrawalsSearch('');
-        setCashFlowPage(1);
-        setDepositPage(1);
-        setWithdrawalsPage(1);
+    };
+
+    const handleRefresh = () => {
+        dispatch(invalidateCache());
+        dispatch(fetchFinancialReports());
     };
 
     const handleApprove = (id) => {
         if (confirm('Apakah Anda yakin ingin menyetujui penarikan dana ini?')) {
             dispatch(approveWithdrawal(id)).then(() => {
                 dispatch(fetchFinancialReports());
-                if (activeTab === 'withdrawals') {
-                    dispatch(fetchWithdrawalsReport({ 
-                        page: withdrawalsPage, 
-                        search: withdrawalsSearch, 
-                        status: withdrawalsStatus 
-                    }));
-                }
             });
         }
     };
@@ -128,140 +128,548 @@ const FinancialReports = () => {
         if (reason) {
             dispatch(rejectWithdrawal({ id, admin_notes: reason })).then(() => {
                 dispatch(fetchFinancialReports());
-                if (activeTab === 'withdrawals') {
-                    dispatch(fetchWithdrawalsReport({ 
-                        page: withdrawalsPage, 
-                        search: withdrawalsSearch, 
-                        status: withdrawalsStatus 
-                    }));
-                }
             });
         }
     };
 
-    // CSV Downloader
-    const handleDownloadCSV = () => {
-        let csvContent = "data:text/csv;charset=utf-8,";
+    // Excel Document Exporter
+    const handleDownloadExcel = () => {
+        let headers = [];
+        let data = [];
         let filename = "";
-        
+
         if (activeTab === 'payouts') {
-            filename = "payout_requests.csv";
-            csvContent += "ID,Name,Email,Amount,Bank,Account Number,Account Name,Date\n";
-            withdrawals.forEach(w => {
-                csvContent += `"${w.id}","${w.user?.name}","${w.user?.email}","${w.amount}","${w.bank_name}","${w.account_number}","${w.account_name}","${w.created_at}"\n`;
-            });
+            filename = "payout_requests.xls";
+            headers = ["ID", "Nama Partner", "Email", "Jumlah Penarikan", "Bank", "No. Rekening", "Nama Rekening", "Tanggal Permintaan"];
+            data = withdrawals.map(w => [
+                w.id,
+                w.user?.name || '',
+                w.user?.email || '',
+                `Rp ${Number(w.amount).toLocaleString('id-ID')}`,
+                w.bank_name || '',
+                w.account_number || '',
+                w.account_name || '',
+                new Date(w.created_at).toLocaleDateString('id-ID')
+            ]);
         } else if (activeTab === 'cash-flow') {
-            filename = "cash_flow_ledger.csv";
-            csvContent += "ID,Date,User,Role,Type,Amount,Description\n";
-            cashFlowData?.data?.forEach(item => {
-                csvContent += `"${item.id}","${item.created_at}","${item.wallet?.user?.name || 'System'}","${item.wallet?.user?.role || 'system'}","${item.type}","${item.amount}","${item.description}"\n`;
+            filename = "arus_kas_buku_besar.xls";
+            headers = ["ID Transaksi", "Tanggal", "User", "Role", "Tipe Mutasi", "Nominal", "Keterangan"];
+            data = (cashFlowData?.data || []).map(item => {
+                const isPositive = Number(item.amount) > 0;
+                const prefix = isPositive ? '+' : '';
+                return [
+                    item.id,
+                    new Date(item.created_at).toLocaleString('id-ID'),
+                    item.wallet?.user?.name || 'System',
+                    item.wallet?.user?.role || 'system',
+                    item.type,
+                    `${prefix}Rp ${Number(item.amount).toLocaleString('id-ID')}`,
+                    item.description || ''
+                ];
             });
         } else if (activeTab === 'deposits') {
-            filename = "deposit_incoming_report.csv";
-            csvContent += "ID,Date,User,Role,Amount,Description\n";
-            cashFlowData?.data?.forEach(item => {
-                csvContent += `"${item.id}","${item.created_at}","${item.wallet?.user?.name || 'System'}","${item.wallet?.user?.role || 'system'}","${item.amount}","${item.description}"\n`;
-            });
+            filename = "laporan_uang_masuk.xls";
+            headers = ["ID Transaksi", "Tanggal", "User", "Role", "Nominal Top-up", "Keterangan"];
+            data = (cashFlowData?.data || []).map(item => [
+                item.id,
+                new Date(item.created_at).toLocaleString('id-ID'),
+                item.wallet?.user?.name || 'System',
+                item.wallet?.user?.role || 'system',
+                `+Rp ${Number(item.amount).toLocaleString('id-ID')}`,
+                item.description || ''
+            ]);
         } else if (activeTab === 'withdrawals') {
-            filename = "withdrawals_outgoing_report.csv";
-            csvContent += "ID,Date,User,Role,Amount,Bank,Account Number,Account Name,Status,Admin Notes\n";
-            withdrawalsReportData?.data?.forEach(w => {
-                csvContent += `"${w.id}","${w.created_at}","${w.user?.name || ''}","${w.user?.role || ''}","${w.amount}","${w.bank_name}","${w.account_number}","${w.account_name}","${w.status}","${w.admin_notes || ''}"\n`;
-            });
+            filename = "laporan_uang_keluar.xls";
+            headers = ["ID Penarikan", "Tanggal", "Mitra / User", "Email", "Nominal Penarikan", "Bank", "No. Rekening", "Nama Rekening", "Status", "Catatan Admin"];
+            data = (withdrawalsReportData?.data || []).map(w => [
+                w.id,
+                new Date(w.created_at).toLocaleDateString('id-ID'),
+                w.user?.name || '',
+                w.user?.email || '',
+                `-Rp ${Number(w.amount).toLocaleString('id-ID')}`,
+                w.bank_name || '',
+                w.account_number || '',
+                w.account_name || '',
+                w.status,
+                w.admin_notes || ''
+            ]);
         }
-        
-        const encodedUri = encodeURI(csvContent);
+
+        let html = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head>
+                <!--[if gte mso 9]>
+                <xml>
+                    <x:ExcelWorkbook>
+                        <x:ExcelWorksheets>
+                            <x:ExcelWorksheet>
+                                <x:Name>GoTam Financial Report</x:Name>
+                                <x:WorksheetOptions>
+                                    <x:DisplayGridlines/>
+                                </x:WorksheetOptions>
+                            </x:ExcelWorksheet>
+                        </x:ExcelWorksheets>
+                    </x:ExcelWorkbook>
+                </xml>
+                <![endif]-->
+                <style>
+                    table { border-collapse: collapse; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px 0; }
+                    th { background-color: #0d9488; color: #FFFFFF; font-weight: bold; font-size: 14px; padding: 12px 18px; border: 1px solid #cbd5e1; text-align: left; }
+                    td { padding: 10px 18px; border: 1px solid #e2e8f0; font-size: 13px; text-align: left; color: #334155; }
+                    tr:nth-child(even) { background-color: #f8fafc; }
+                </style>
+            </head>
+            <body>
+                <h2 style="font-family: sans-serif; color: #0f172a; margin-left: 20px;">Laporan Keuangan GoTam - ${activeTab.toUpperCase()}</h2>
+                <p style="font-family: sans-serif; color: #64748b; margin-left: 20px;">Diekspor pada tanggal: ${new Date().toLocaleString('id-ID')}</p>
+                <table>
+                    <thead>
+                        <tr>
+                            ${headers.map(h => `<th>${h}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(row => `
+                            <tr>
+                                ${row.map(cell => `<td>${cell}</td>`).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </body>
+            </html>
+        `;
+
+        const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+        const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", filename);
+        link.href = url;
+        link.download = filename;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
-    // Filter submit handlers
+    // Filter submit handler
     const handleSearchSubmit = (e) => {
         e.preventDefault();
         if (activeTab === 'cash-flow') {
-            setCashFlowSearch(cfSearchInput);
-            setCashFlowPage(1);
+            dispatch(setCashFlowParams({ search: searchInput, page: 1 }));
         } else if (activeTab === 'deposits') {
-            setDepositSearch(depSearchInput);
-            setDepositPage(1);
+            dispatch(setDepositParams({ search: searchInput, page: 1 }));
         } else if (activeTab === 'withdrawals') {
-            setWithdrawalsSearch(wSearchInput);
-            setWithdrawalsPage(1);
+            dispatch(setWithdrawalsParams({ search: searchInput, page: 1 }));
         }
     };
 
     const renderTypeBadge = (type) => {
-        switch (type) {
-            case 'deposit':
-                return <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full text-[11px] font-extrabold capitalize">Top-up</span>;
-            case 'withdrawal':
-                return <span className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full text-[11px] font-extrabold capitalize">Penarikan</span>;
-            case 'commission_deduction':
-                return <span className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[11px] font-extrabold capitalize">Platform Fee</span>;
-            case 'earnings':
-                return <span className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[11px] font-extrabold capitalize">Earnings</span>;
-            case 'payment':
-                return <span className="px-3 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-full text-[11px] font-extrabold capitalize">Payment</span>;
-            default:
-                return <span className="px-3 py-1 bg-gray-50 text-gray-700 border border-gray-200 rounded-full text-[11px] font-extrabold capitalize">{type}</span>;
-        }
+        const variant = {
+            deposit: 'success',
+            withdrawal: 'danger',
+            commission_deduction: 'warning',
+            earnings: 'info',
+            payment: 'purple'
+        }[type] || 'secondary';
+
+        const label = {
+            deposit: 'Top-up',
+            withdrawal: 'Penarikan',
+            commission_deduction: 'Platform Fee',
+            earnings: 'Earnings',
+            payment: 'Payment'
+        }[type] || type;
+
+        return <Badge variant={variant}>{label}</Badge>;
     };
 
     const renderStatusBadge = (status) => {
-        switch (status) {
-            case 'pending':
-                return (
-                    <span className="flex items-center gap-1.5 w-fit px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[11px] font-extrabold">
-                        <Clock size={12} /> Pending
-                    </span>
-                );
-            case 'completed':
-                return (
-                    <span className="flex items-center gap-1.5 w-fit px-3 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full text-[11px] font-extrabold">
-                        <CheckCircle2 size={12} /> Success
-                    </span>
-                );
-            case 'rejected':
-                return (
-                    <span className="flex items-center gap-1.5 w-fit px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full text-[11px] font-extrabold">
-                        <XCircle size={12} /> Rejected
-                    </span>
-                );
-            default:
-                return <span className="px-3 py-1 bg-gray-50 text-gray-700 border border-gray-200 rounded-full text-[11px] font-extrabold capitalize">{status}</span>;
-        }
+        const variant = {
+            pending: 'warning',
+            completed: 'success',
+            rejected: 'danger'
+        }[status] || 'secondary';
+
+        const label = {
+            pending: 'Pending',
+            completed: 'Success',
+            rejected: 'Rejected'
+        }[status] || status;
+
+        const icon = {
+            pending: <Clock size={10} />,
+            completed: <CheckCircle2 size={10} />,
+            rejected: <XCircle size={10} />
+        }[status];
+
+        return <Badge variant={variant} icon={icon}>{label}</Badge>;
     };
 
-    const renderPagination = (data, setPage) => {
-        if (!data || data.last_page <= 1) return null;
+    const renderPaginationControls = (data, updateParamsAction) => {
+        if (!data || data.total === 0) return null;
         return (
-            <div className="p-6 border-t border-outline-variant/20 flex items-center justify-between bg-surface-bright">
+            <div className="p-6 border-t border-outline-variant/20 flex flex-col sm:flex-row gap-4 items-center justify-between bg-surface-bright">
                 <span className="text-[12px] text-on-surface-variant font-semibold">
-                    Menampilkan halaman {data.current_page} dari {data.last_page} ({data.total} total item)
+                    Menampilkan data {data.from || 0} - {data.to || 0} dari {data.total} total item
                 </span>
-                <div className="flex gap-2">
-                    <button
-                        disabled={data.current_page === 1}
-                        onClick={() => setPage(data.current_page - 1)}
-                        className="px-4 py-2 border border-outline-variant/30 rounded-lg text-[12px] font-bold text-primary disabled:opacity-50 hover:bg-surface-container transition-colors"
-                    >
-                        Sebelumnya
-                    </button>
-                    <button
-                        disabled={data.current_page === data.last_page}
-                        onClick={() => setPage(data.current_page + 1)}
-                        className="px-4 py-2 border border-outline-variant/30 rounded-lg text-[12px] font-bold text-primary disabled:opacity-50 hover:bg-surface-container transition-colors"
-                    >
-                        Selanjutnya
-                    </button>
+                <div className="flex items-center gap-4">
+                    {/* Per Page Selection */}
+                    <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold text-on-surface-variant">Tampilkan:</span>
+                        <select
+                            value={data.per_page}
+                            onChange={(e) => dispatch(updateParamsAction({ per_page: Number(e.target.value), page: 1 }))}
+                            className="px-2 py-1 bg-surface-container-low border border-outline-variant/30 rounded-lg text-[11px] font-bold cursor-pointer focus:outline-none"
+                        >
+                            {[5, 10, 15, 25, 50, 100].map(v => (
+                                <option key={v} value={v}>{v}</option>
+                            ))}
+                        </select>
+                    </div>
+                    {/* Previous & Next page triggers */}
+                    <div className="flex gap-2">
+                        <Button
+                            disabled={data.current_page === 1}
+                            onClick={() => dispatch(updateParamsAction({ page: data.current_page - 1 }))}
+                            variant="outlineVariant"
+                            size="sm"
+                        >
+                            Sebelumnya
+                        </Button>
+                        <Button
+                            disabled={data.current_page === data.last_page}
+                            onClick={() => dispatch(updateParamsAction({ page: data.current_page + 1 }))}
+                            variant="outlineVariant"
+                            size="sm"
+                        >
+                            Selanjutnya
+                        </Button>
+                    </div>
                 </div>
             </div>
         );
     };
+
+    // Columns Definitions for TanStack Table
+    const payoutColumns = [
+        {
+            accessorKey: 'user.name',
+            header: 'User/Partner Name',
+            cell: (info) => {
+                const row = info.row.original;
+                return (
+                    <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-lg bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center font-bold text-xs">
+                            {(row.user?.name || '').charAt(0)}
+                        </div>
+                        <div>
+                            <p className="font-bold text-primary text-[13px] leading-none">{row.user?.name}</p>
+                            <p className="text-[10px] font-semibold text-on-surface-variant mt-0.5 leading-none">{row.user?.email} • <span className="capitalize">{row.user?.role}</span></p>
+                        </div>
+                    </div>
+                );
+            }
+        },
+        {
+            accessorKey: 'amount',
+            header: 'Amount',
+            cell: (info) => <span className="font-bold text-[14px] text-primary">Rp {Number(info.getValue()).toLocaleString('id-ID')}</span>
+        },
+        {
+            accessorKey: 'bank_name',
+            header: 'Bank Details',
+            cell: (info) => {
+                const row = info.row.original;
+                return (
+                    <div>
+                        <p className="font-bold text-on-surface">{row.bank_name}</p>
+                        <p className="text-[12px] font-semibold text-on-surface-variant">{row.account_number} • {row.account_name}</p>
+                    </div>
+                );
+            }
+        },
+        {
+            accessorKey: 'created_at',
+            header: 'Request Date',
+            cell: (info) => (
+                <div className="flex items-center gap-2 text-on-surface-variant font-semibold">
+                    <Clock size={16} className="text-outline" />
+                    {new Date(info.getValue()).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </div>
+            )
+        },
+        {
+            id: 'actions',
+            header: () => <div className="text-right">Decision</div>,
+            cell: (info) => {
+                const id = info.row.original.id;
+                return (
+                    <div className="flex gap-2 justify-end">
+                        <Button 
+                            onClick={() => handleApprove(id)}
+                            variant="success"
+                            size="sm"
+                        >
+                            Approve
+                        </Button>
+                        <Button 
+                            onClick={() => handleReject(id)}
+                            variant="dangerOutline"
+                            size="sm"
+                        >
+                            Reject
+                        </Button>
+                    </div>
+                );
+            }
+        }
+    ];
+
+    const cashFlowColumns = [
+        {
+            accessorKey: 'created_at',
+            header: 'Tanggal',
+            cell: (info) => new Date(info.getValue()).toLocaleString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
+        },
+        {
+            accessorKey: 'id',
+            header: 'ID',
+            cell: (info) => <span className="font-bold text-primary">#{info.getValue()}</span>
+        },
+        {
+            accessorKey: 'wallet.user.name',
+            header: 'User',
+            cell: (info) => {
+                const row = info.row.original;
+                const userName = row.wallet?.user?.name || 'System';
+                const userRole = row.wallet?.user?.role || 'system';
+                return (
+                    <div className="flex items-center gap-2">
+                        <div className="h-6 w-6 rounded-md bg-surface-container text-primary flex items-center justify-center font-bold text-[10px]">
+                            {userName.charAt(0)}
+                        </div>
+                        <div>
+                            <p className="font-bold text-primary text-[13px] leading-none">{userName}</p>
+                            <p className="text-[10px] font-semibold text-on-surface-variant mt-0.5 leading-none">{userRole}</p>
+                        </div>
+                    </div>
+                );
+            }
+        },
+        {
+            accessorKey: 'type',
+            header: 'Tipe',
+            cell: (info) => renderTypeBadge(info.getValue())
+        },
+        {
+            accessorKey: 'amount',
+            header: 'Nominal',
+            cell: (info) => {
+                const val = Number(info.getValue());
+                const isPositive = val > 0;
+                return (
+                    <span className={`font-bold text-[13px] whitespace-nowrap ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                        {isPositive ? '+' : ''}Rp {val.toLocaleString('id-ID', { minimumFractionDigits: 2 })}
+                    </span>
+                );
+            }
+        },
+        {
+            accessorKey: 'description',
+            header: 'Keterangan',
+            cell: (info) => (
+                <span className="text-on-surface-variant font-semibold block max-w-xs truncate" title={info.getValue()}>
+                    {info.getValue()}
+                </span>
+            )
+        }
+    ];
+
+    const depositColumns = [
+        {
+            accessorKey: 'created_at',
+            header: 'Tanggal',
+            cell: (info) => new Date(info.getValue()).toLocaleString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
+        },
+        {
+            accessorKey: 'id',
+            header: 'ID',
+            cell: (info) => <span className="font-bold text-primary">#{info.getValue()}</span>
+        },
+        {
+            accessorKey: 'wallet.user.name',
+            header: 'User',
+            cell: (info) => {
+                const row = info.row.original;
+                const userName = row.wallet?.user?.name || 'System';
+                const userRole = row.wallet?.user?.role || 'system';
+                return (
+                    <div className="flex items-center gap-2">
+                        <div className="h-6 w-6 rounded-md bg-surface-container text-primary flex items-center justify-center font-bold text-[10px]">
+                            {userName.charAt(0)}
+                        </div>
+                        <div>
+                            <p className="font-bold text-primary text-[13px] leading-none">{userName}</p>
+                            <p className="text-[10px] font-semibold text-on-surface-variant mt-0.5 leading-none">{userRole}</p>
+                        </div>
+                    </div>
+                );
+            }
+        },
+        {
+            accessorKey: 'amount',
+            header: 'Nominal',
+            cell: (info) => {
+                const val = Number(info.getValue());
+                return (
+                    <span className="font-bold text-[13px] whitespace-nowrap text-green-600">
+                        +Rp {val.toLocaleString('id-ID', { minimumFractionDigits: 2 })}
+                    </span>
+                );
+            }
+        },
+        {
+            accessorKey: 'description',
+            header: 'Keterangan',
+            cell: (info) => (
+                <span className="text-on-surface-variant font-semibold block max-w-xs truncate" title={info.getValue()}>
+                    {info.getValue()}
+                </span>
+            )
+        }
+    ];
+
+    const withdrawalsColumns = [
+        {
+            accessorKey: 'created_at',
+            header: 'Tanggal',
+            cell: (info) => new Date(info.getValue()).toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            })
+        },
+        {
+            accessorKey: 'id',
+            header: 'ID',
+            cell: (info) => <span className="font-bold text-primary">#{info.getValue()}</span>
+        },
+        {
+            accessorKey: 'user.name',
+            header: 'User/Mitra',
+            cell: (info) => {
+                const row = info.row.original;
+                const userName = row.user?.name || '';
+                const userEmail = row.user?.email || '';
+                return (
+                    <div className="flex items-center gap-2">
+                        <div className="h-6 w-6 rounded-md bg-surface-container text-primary flex items-center justify-center font-bold text-[10px]">
+                            {userName.charAt(0)}
+                        </div>
+                        <div>
+                            <p className="font-bold text-primary text-[13px] leading-none">{userName}</p>
+                            <p className="text-[10px] font-semibold text-on-surface-variant mt-0.5 leading-none">{userEmail}</p>
+                        </div>
+                    </div>
+                );
+            }
+        },
+        {
+            accessorKey: 'amount',
+            header: 'Jumlah',
+            cell: (info) => (
+                <span className="font-bold text-[13px] text-red-600">
+                    -Rp {Number(info.getValue()).toLocaleString('id-ID', { minimumFractionDigits: 2 })}
+                </span>
+            )
+        },
+        {
+            accessorKey: 'bank_name',
+            header: 'Bank Details',
+            cell: (info) => {
+                const row = info.row.original;
+                return (
+                    <div>
+                        <p className="font-bold text-on-surface leading-tight">{row.bank_name}</p>
+                        <p className="text-[12px] font-semibold text-on-surface-variant mt-0.5">{row.account_number} • {row.account_name}</p>
+                    </div>
+                );
+            }
+        },
+        {
+            accessorKey: 'status',
+            header: 'Status',
+            cell: (info) => renderStatusBadge(info.getValue())
+        },
+        {
+            id: 'actions',
+            header: 'Aksi / Catatan Admin',
+            cell: (info) => {
+                const row = info.row.original;
+                if (row.status === 'pending') {
+                    return (
+                        <div className="flex gap-2">
+                            <Button 
+                                onClick={() => handleApprove(row.id)}
+                                variant="success"
+                                size="sm"
+                            >
+                                Approve
+                            </Button>
+                            <Button 
+                                onClick={() => handleReject(row.id)}
+                                variant="dangerOutline"
+                                size="sm"
+                            >
+                                Reject
+                            </Button>
+                        </div>
+                    );
+                }
+                return (
+                    <span className="text-[12px] font-semibold text-on-surface-variant block max-w-xs truncate" title={row.admin_notes}>
+                        {row.admin_notes || '-'}
+                    </span>
+                );
+            }
+        }
+    ];
+
+    // TanStack Tables Configuration
+    const tablePayouts = useReactTable({
+        data: withdrawals || [],
+        columns: payoutColumns,
+        getCoreRowModel: getCoreRowModel(),
+    });
+
+    const tableCashFlow = useReactTable({
+        data: cashFlowData?.data || [],
+        columns: cashFlowColumns,
+        getCoreRowModel: getCoreRowModel(),
+    });
+
+    const tableDeposits = useReactTable({
+        data: cashFlowData?.data || [],
+        columns: depositColumns,
+        getCoreRowModel: getCoreRowModel(),
+    });
+
+    const tableWithdrawals = useReactTable({
+        data: withdrawalsReportData?.data || [],
+        columns: withdrawalsColumns,
+        getCoreRowModel: getCoreRowModel(),
+    });
 
     return (
         <div className="flex flex-col gap-10 animate-in fade-in duration-500">
@@ -271,32 +679,42 @@ const FinancialReports = () => {
                     <h2 className="text-[32px] font-bold text-on-background tracking-tight">Financial Reports & Ledger</h2>
                     <p className="text-[16px] text-on-surface-variant font-medium">Manage payouts, track platform revenue, and monitor company ledger sheets.</p>
                 </div>
-                <button 
-                    onClick={handleDownloadCSV}
-                    className="flex items-center gap-2 text-primary hover:bg-primary-fixed px-6 py-3 rounded-xl font-bold text-[14px] transition-colors border border-primary active:scale-95"
-                >
-                    <Download size={20} />
-                    <span>Download data CSV</span>
-                </button>
+                <div className="flex gap-3">
+                    <Button 
+                        onClick={handleRefresh}
+                        variant="outlineVariant"
+                        size="lg"
+                        icon={RefreshCw}
+                        className={loading ? 'animate-spin' : ''}
+                    >
+                        Refresh
+                    </Button>
+                    <Button 
+                        onClick={handleDownloadExcel}
+                        variant="outline"
+                        size="lg"
+                        icon={Download}
+                    >
+                        Export Excel
+                    </Button>
+                </div>
             </div>
 
             {/* Financial Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {[
-                    { label: 'Platform Net Commission', value: financialReport?.income_statement?.platform_commission_formatted || 'Rp 0', icon: <TrendingUp className="text-green-600" />, color: 'bg-green-50' },
-                    { label: 'Total Withdrawals', value: financialReport?.balance_sheet?.total_withdrawals_formatted || 'Rp 0', icon: <Banknote className="text-blue-600" />, color: 'bg-blue-50' },
-                    { label: 'Held Wallet Balances (Liability)', value: financialReport?.balance_sheet?.held_user_balances_liability_formatted || 'Rp 0', icon: <CreditCard className="text-amber-600" />, color: 'bg-amber-50' },
-                    { label: 'Simulated Bank Cash', value: financialReport?.balance_sheet?.simulated_bank_balance_formatted || 'Rp 0', icon: <ArrowUpRight className="text-purple-600" />, color: 'bg-purple-50' },
+                    { label: 'Platform Net Commission', value: financialReport?.income_statement?.platform_commission_formatted || 'Rp 0', icon: TrendingUp, color: 'bg-green-50' },
+                    { label: 'Total Withdrawals', value: financialReport?.balance_sheet?.total_withdrawals_formatted || 'Rp 0', icon: Banknote, color: 'bg-blue-50' },
+                    { label: 'Held Wallet Balances (Liability)', value: financialReport?.balance_sheet?.held_user_balances_liability_formatted || 'Rp 0', icon: CreditCard, color: 'bg-amber-50' },
+                    { label: 'Simulated Bank Cash', value: financialReport?.balance_sheet?.simulated_bank_balance_formatted || 'Rp 0', icon: ArrowUpRight, color: 'bg-purple-50' },
                 ].map((stat, i) => (
-                    <div key={i} className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/20 shadow-sm">
-                        <div className="flex items-center gap-4">
-                            <div className={`p-3 rounded-xl ${stat.color}`}>
-                                {stat.icon}
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest leading-none">{stat.label}</p>
-                                <p className="text-[18px] font-bold text-primary mt-1.5 whitespace-nowrap">{stat.value}</p>
-                            </div>
+                    <div key={i} className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/20 shadow-sm flex items-center gap-4">
+                        <div className={`p-3 rounded-xl ${stat.color}`}>
+                            <stat.icon size={20} className={stat.color.includes('green') ? 'text-green-600' : stat.color.includes('blue') ? 'text-blue-600' : stat.color.includes('amber') ? 'text-amber-600' : 'text-purple-600'} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest leading-none">{stat.label}</p>
+                            <p className="text-[18px] font-bold text-primary mt-1.5 whitespace-nowrap">{stat.value}</p>
                         </div>
                     </div>
                 ))}
@@ -332,42 +750,28 @@ const FinancialReports = () => {
                 })}
             </div>
 
-            {/* Main Content Card */}
-            <div className="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,15,34,0.05)] border border-outline-variant/20 flex flex-col overflow-hidden mb-10">
-                
-                {/* Dynamic Filters header based on Active Tab */}
-                <div className="p-8 border-b border-outline-variant/20 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-surface-bright">
-                    <div>
-                        <h3 className="text-[20px] font-bold text-primary">
-                            {activeTab === 'payouts' && 'Pending Payout Requests'}
-                            {activeTab === 'cash-flow' && 'Buku Besar & Arus Kas'}
-                            {activeTab === 'deposits' && 'Laporan Uang Masuk'}
-                            {activeTab === 'withdrawals' && 'Laporan Uang Keluar (Penarikan)'}
-                        </h3>
-                        <p className="text-[14px] text-on-surface-variant font-medium">
-                            {activeTab === 'payouts' && 'Review and process partner withdrawal requests.'}
-                            {activeTab === 'cash-flow' && 'Catatan kronologis dari seluruh transaksi & mutasi saldo di platform.'}
-                            {activeTab === 'deposits' && 'Seluruh transaksi pengisian saldo (top-up) dompet oleh pengguna.'}
-                            {activeTab === 'withdrawals' && 'Riwayat seluruh permintaan penarikan dana beserta status transaksinya.'}
-                        </p>
-                    </div>
-
-                    {/* Filter controls */}
-                    {activeTab !== 'payouts' && (
+            {/* Main Content Card (Component Based) */}
+            <Card
+                title={
+                    activeTab === 'payouts' ? 'Pending Payout Requests' :
+                    activeTab === 'cash-flow' ? 'Buku Besar & Arus Kas' :
+                    activeTab === 'deposits' ? 'Laporan Uang Masuk' : 'Laporan Uang Keluar (Penarikan)'
+                }
+                subtitle={
+                    activeTab === 'payouts' ? 'Review and process partner withdrawal requests.' :
+                    activeTab === 'cash-flow' ? 'Catatan kronologis dari seluruh transaksi & mutasi saldo di platform.' :
+                    activeTab === 'deposits' ? 'Seluruh transaksi pengisian saldo (top-up) dompet oleh pengguna.' :
+                    'Riwayat seluruh permintaan penarikan dana beserta status transaksinya.'
+                }
+                headerAction={
+                    activeTab !== 'payouts' && (
                         <form onSubmit={handleSearchSubmit} className="flex flex-wrap items-center gap-4">
                             <div className="relative">
                                 <input
                                     type="text"
                                     placeholder="Cari nama atau email..."
-                                    value={
-                                        activeTab === 'cash-flow' ? cfSearchInput :
-                                        activeTab === 'deposits' ? depSearchInput : wSearchInput
-                                    }
-                                    onChange={(e) => {
-                                        if (activeTab === 'cash-flow') setCfSearchInput(e.target.value);
-                                        else if (activeTab === 'deposits') setDepSearchInput(e.target.value);
-                                        else setWSearchInput(e.target.value);
-                                    }}
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
                                     className="pl-10 pr-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-xl text-[14px] text-on-surface focus:outline-none focus:border-primary w-60 font-semibold"
                                 />
                                 <Search className="absolute left-3 top-3 text-on-surface-variant/60" size={16} />
@@ -375,10 +779,9 @@ const FinancialReports = () => {
 
                             {activeTab === 'cash-flow' && (
                                 <select
-                                    value={cashFlowType}
+                                    value={cashFlowParams.type}
                                     onChange={(e) => {
-                                        setCashFlowType(e.target.value);
-                                        setCashFlowPage(1);
+                                        dispatch(setCashFlowParams({ type: e.target.value, page: 1 }));
                                     }}
                                     className="px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-xl text-[14px] text-on-surface focus:outline-none focus:border-primary font-bold cursor-pointer"
                                 >
@@ -393,10 +796,9 @@ const FinancialReports = () => {
 
                             {activeTab === 'withdrawals' && (
                                 <select
-                                    value={withdrawalsStatus}
+                                    value={withdrawalsParams.status}
                                     onChange={(e) => {
-                                        setWithdrawalsStatus(e.target.value);
-                                        setWithdrawalsPage(1);
+                                        dispatch(setWithdrawalsParams({ status: e.target.value, page: 1 }));
                                     }}
                                     className="px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-xl text-[14px] text-on-surface focus:outline-none focus:border-primary font-bold cursor-pointer"
                                 >
@@ -407,17 +809,16 @@ const FinancialReports = () => {
                                 </select>
                             )}
 
-                            <button
-                                type="submit"
-                                className="px-6 py-2.5 bg-primary text-white font-bold text-[14px] rounded-xl hover:bg-primary/95 transition-all active:scale-95 shadow-sm"
-                            >
+                            <Button type="submit">
                                 Cari
-                            </button>
+                            </Button>
                         </form>
-                    )}
-                </div>
-
-                {/* Table Area */}
+                    )
+                }
+                noPadding
+                className="mb-10"
+            >
+                {/* Table Area (Component Based) */}
                 <div className="overflow-x-auto w-full">
                     {loading ? (
                         <div className="py-20 flex justify-center">
@@ -428,63 +829,7 @@ const FinancialReports = () => {
                             {/* Tab 1: Payout Requests */}
                             {activeTab === 'payouts' && (
                                 withdrawals.length > 0 ? (
-                                    <table className="w-full text-left">
-                                        <thead>
-                                            <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                                <th className="px-10 py-5 font-bold">User/Partner Name</th>
-                                                <th className="px-10 py-5 font-bold">Amount</th>
-                                                <th className="px-10 py-5 font-bold">Bank Details</th>
-                                                <th className="px-10 py-5 font-bold">Request Date</th>
-                                                <th className="px-10 py-5 font-bold text-right">Decision</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="text-[14px] divide-y divide-outline-variant/10">
-                                            {withdrawals.map((item) => (
-                                                <tr key={item.id} className="hover:bg-surface-container-low transition-colors group">
-                                                    <td className="px-10 py-6">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="h-10 w-10 rounded-xl bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center font-bold">
-                                                                {item.user?.name?.charAt(0)}
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-bold text-primary leading-tight">{item.user?.name}</p>
-                                                                <p className="text-[12px] font-semibold text-on-surface-variant mt-0.5">{item.user?.email} • <span className="capitalize">{item.user?.role}</span></p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-10 py-6">
-                                                        <span className="font-bold text-[16px] text-primary">Rp {Number(item.amount).toLocaleString('id-ID')}</span>
-                                                    </td>
-                                                    <td className="px-10 py-6">
-                                                        <p className="font-bold text-on-surface">{item.bank_name}</p>
-                                                        <p className="text-[12px] font-semibold text-on-surface-variant">{item.account_number} • {item.account_name}</p>
-                                                    </td>
-                                                    <td className="px-10 py-6">
-                                                        <div className="flex items-center gap-2 text-on-surface-variant font-semibold">
-                                                            <Clock size={16} className="text-outline" />
-                                                            {new Date(item.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-10 py-6 text-right">
-                                                        <div className="flex gap-2 justify-end">
-                                                            <button 
-                                                                onClick={() => handleApprove(item.id)}
-                                                                className="px-4 py-2.5 bg-green-600 text-white rounded-lg text-[12px] font-bold hover:bg-green-700 transition-all active:scale-95 shadow-sm"
-                                                            >
-                                                                Approve
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => handleReject(item.id)}
-                                                                className="px-4 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-lg text-[12px] font-bold hover:bg-red-600 hover:text-white transition-all active:scale-95 shadow-sm"
-                                                            >
-                                                                Reject
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                    <Table tableInstance={tablePayouts} />
                                 ) : (
                                     <div className="py-20 text-center flex flex-col items-center gap-4">
                                         <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center">
@@ -495,65 +840,12 @@ const FinancialReports = () => {
                                 )
                             )}
 
-                            {/* Tab 2 & 3: Jurnal / Arus Kas & Deposits (both use cashFlowData) */}
-                            {(activeTab === 'cash-flow' || activeTab === 'deposits') && (
+                            {/* Tab 2: Jurnal / Arus Kas */}
+                            {activeTab === 'cash-flow' && (
                                 cashFlowData?.data?.length > 0 ? (
                                     <div className="flex flex-col">
-                                        <table className="w-full text-left">
-                                            <thead>
-                                                <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                                    <th className="px-10 py-5 font-bold">Tanggal</th>
-                                                    <th className="px-10 py-5 font-bold">ID</th>
-                                                    <th className="px-10 py-5 font-bold">User</th>
-                                                    <th className="px-10 py-5 font-bold">Tipe</th>
-                                                    <th className="px-10 py-5 font-bold">Nominal</th>
-                                                    <th className="px-10 py-5 font-bold">Keterangan</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="text-[14px] divide-y divide-outline-variant/10">
-                                                {cashFlowData.data.map((item) => {
-                                                    const isPositive = Number(item.amount) > 0;
-                                                    return (
-                                                        <tr key={item.id} className="hover:bg-surface-container-low transition-colors">
-                                                            <td className="px-10 py-6 whitespace-nowrap text-on-surface-variant font-semibold">
-                                                                {new Date(item.created_at).toLocaleString('id-ID', {
-                                                                    day: 'numeric',
-                                                                    month: 'short',
-                                                                    year: 'numeric',
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit'
-                                                                })}
-                                                            </td>
-                                                            <td className="px-10 py-6 font-bold text-primary">#{item.id}</td>
-                                                            <td className="px-10 py-6">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="h-8 w-8 rounded-lg bg-surface-container text-primary flex items-center justify-center font-bold text-[12px]">
-                                                                        {(item.wallet?.user?.name || 'S').charAt(0)}
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="font-bold text-primary leading-tight">{item.wallet?.user?.name || 'System'}</p>
-                                                                        <p className="text-[11px] font-semibold text-on-surface-variant mt-0.5">{item.wallet?.user?.role || 'system'}</p>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td className="px-10 py-6">
-                                                                {renderTypeBadge(item.type)}
-                                                            </td>
-                                                            <td className={`px-10 py-6 font-bold text-[15px] whitespace-nowrap ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                                                                {isPositive ? '+' : ''}Rp {Number(item.amount).toLocaleString('id-ID', { minimumFractionDigits: 2 })}
-                                                            </td>
-                                                            <td className="px-10 py-6 text-on-surface-variant font-semibold max-w-xs truncate" title={item.description}>
-                                                                {item.description}
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
-                                        {activeTab === 'cash-flow' 
-                                            ? renderPagination(cashFlowData, setCashFlowPage)
-                                            : renderPagination(cashFlowData, setDepositPage)
-                                        }
+                                        <Table tableInstance={tableCashFlow} />
+                                        {renderPaginationControls(cashFlowData, setCashFlowParams)}
                                     </div>
                                 ) : (
                                     <div className="py-20 text-center flex flex-col items-center gap-4">
@@ -565,81 +857,29 @@ const FinancialReports = () => {
                                 )
                             )}
 
-                            {/* Tab 4: Withdrawals (Uang Keluar) */}
+                            {/* Tab 3: Uang Masuk */}
+                            {activeTab === 'deposits' && (
+                                cashFlowData?.data?.length > 0 ? (
+                                    <div className="flex flex-col">
+                                        <Table tableInstance={tableDeposits} />
+                                        {renderPaginationControls(cashFlowData, setDepositParams)}
+                                    </div>
+                                ) : (
+                                    <div className="py-20 text-center flex flex-col items-center gap-4">
+                                        <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center">
+                                            <Search className="text-outline" size={32} />
+                                        </div>
+                                        <p className="text-on-surface-variant font-bold">Tidak ada data transaksi yang ditemukan.</p>
+                                    </div>
+                                )
+                            )}
+
+                            {/* Tab 4: Uang Keluar */}
                             {activeTab === 'withdrawals' && (
                                 withdrawalsReportData?.data?.length > 0 ? (
                                     <div className="flex flex-col">
-                                        <table className="w-full text-left">
-                                            <thead>
-                                                <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                                    <th className="px-10 py-5 font-bold">Tanggal</th>
-                                                    <th className="px-10 py-5 font-bold">ID</th>
-                                                    <th className="px-10 py-5 font-bold">User/Mitra</th>
-                                                    <th className="px-10 py-5 font-bold">Jumlah</th>
-                                                    <th className="px-10 py-5 font-bold">Bank Details</th>
-                                                    <th className="px-10 py-5 font-bold">Status</th>
-                                                    <th className="px-10 py-5 font-bold">Aksi / Catatan Admin</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="text-[14px] divide-y divide-outline-variant/10">
-                                                {withdrawalsReportData.data.map((item) => (
-                                                    <tr key={item.id} className="hover:bg-surface-container-low transition-colors">
-                                                        <td className="px-10 py-6 whitespace-nowrap text-on-surface-variant font-semibold">
-                                                            {new Date(item.created_at).toLocaleDateString('id-ID', {
-                                                                day: 'numeric',
-                                                                month: 'short',
-                                                                year: 'numeric'
-                                                            })}
-                                                        </td>
-                                                        <td className="px-10 py-6 font-bold text-primary">#{item.id}</td>
-                                                        <td className="px-10 py-6">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="h-8 w-8 rounded-lg bg-surface-container text-primary flex items-center justify-center font-bold text-[12px]">
-                                                                    {(item.user?.name || 'U').charAt(0)}
-                                                                </div>
-                                                                <div>
-                                                                    <p className="font-bold text-primary leading-tight">{item.user?.name}</p>
-                                                                    <p className="text-[11px] font-semibold text-on-surface-variant mt-0.5">{item.user?.email}</p>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-10 py-6 font-bold text-[15px] text-red-600">
-                                                            -Rp {Number(item.amount).toLocaleString('id-ID', { minimumFractionDigits: 2 })}
-                                                        </td>
-                                                        <td className="px-10 py-6">
-                                                            <p className="font-bold text-on-surface leading-tight">{item.bank_name}</p>
-                                                            <p className="text-[12px] font-semibold text-on-surface-variant mt-0.5">{item.account_number} • {item.account_name}</p>
-                                                        </td>
-                                                        <td className="px-10 py-6">
-                                                            {renderStatusBadge(item.status)}
-                                                        </td>
-                                                        <td className="px-10 py-6">
-                                                            {item.status === 'pending' ? (
-                                                                <div className="flex gap-2">
-                                                                    <button 
-                                                                        onClick={() => handleApprove(item.id)}
-                                                                        className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-[11px] font-bold hover:bg-green-700 transition-all active:scale-95"
-                                                                    >
-                                                                        Approve
-                                                                    </button>
-                                                                    <button 
-                                                                        onClick={() => handleReject(item.id)}
-                                                                        className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg text-[11px] font-bold hover:bg-red-600 hover:text-white transition-all active:scale-95"
-                                                                    >
-                                                                        Reject
-                                                                    </button>
-                                                                </div>
-                                                            ) : (
-                                                                <span className="text-[12px] font-semibold text-on-surface-variant block max-w-xs truncate" title={item.admin_notes}>
-                                                                    {item.admin_notes || '-'}
-                                                                </span>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                        {renderPagination(withdrawalsReportData, setWithdrawalsPage)}
+                                        <Table tableInstance={tableWithdrawals} />
+                                        {renderPaginationControls(withdrawalsReportData, setWithdrawalsParams)}
                                     </div>
                                 ) : (
                                     <div className="py-20 text-center flex flex-col items-center gap-4">
@@ -653,7 +893,7 @@ const FinancialReports = () => {
                         </>
                     )}
                 </div>
-            </div>
+            </Card>
         </div>
     );
 };
