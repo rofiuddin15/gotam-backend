@@ -49,9 +49,9 @@ class PartnerServiceController extends Controller
     /**
      * Update an existing service
      */
-    public function update(Request $request, PartnerService $service)
+    public function update(Request $request, PartnerService $catalog)
     {
-        if ($service->mitra_id !== Auth::id()) {
+        if ($catalog->mitra_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -60,26 +60,34 @@ class PartnerServiceController extends Controller
             'price' => 'numeric|min:0',
             'category' => 'in:service,product',
             'is_available' => 'boolean',
+            'description' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        $service->update($request->all());
+        $data = $request->all();
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('services', 'public');
+        }
+
+        $catalog->update($data);
 
         return response()->json([
             'message' => 'Layanan/Produk berhasil diperbarui.',
-            'service' => $service
+            'service' => $catalog
         ]);
     }
 
     /**
      * Delete a service
      */
-    public function destroy(PartnerService $service)
+    public function destroy(PartnerService $catalog)
     {
-        if ($service->mitra_id !== Auth::id()) {
+        if ($catalog->mitra_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $service->delete();
+        $catalog->delete();
 
         return response()->json(['message' => 'Layanan/Produk berhasil dihapus.']);
     }
