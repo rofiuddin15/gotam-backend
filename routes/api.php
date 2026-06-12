@@ -24,6 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/me', [AuthController::class, 'updateMe']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/service-categories', [ServiceCategoryController::class, 'index']);
 
     // Booking Routes
     Route::get('/bookings', [BookingController::class, 'index']);

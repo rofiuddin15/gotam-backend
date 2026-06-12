@@ -59,6 +59,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected $appends = [
+        'completed_bookings_count',
+        'average_rating',
+    ];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -105,5 +110,22 @@ class User extends Authenticatable
     public function bankAccounts()
     {
         return $this->hasMany(BankAccount::class);
+    }
+
+    public function getCompletedBookingsCountAttribute()
+    {
+        if ($this->role !== 'partner') {
+            return 0;
+        }
+        return $this->mitraBookings()->where('status', 'completed')->count();
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        if ($this->role !== 'partner') {
+            return 0.0;
+        }
+        $avg = $this->mitraBookings()->where('status', 'completed')->whereNotNull('rating')->avg('rating');
+        return $avg ? round((float)$avg, 1) : 5.0;
     }
 }

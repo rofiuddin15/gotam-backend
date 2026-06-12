@@ -150,15 +150,15 @@ const MitraManagement = () => {
                     ) : (
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                    <th className="px-10 py-5 font-bold">Nama Bengkel / Mitra</th>
-                                    <th className="px-10 py-5 font-bold">Keahlian</th>
-                                    <th className="px-10 py-5 font-bold">Layanan</th>
-                                    <th className="px-10 py-5 font-bold text-center">Status</th>
-                                    <th className="px-10 py-5 font-bold text-right">Aksi</th>
+                                <tr className="bg-surface-container-low text-on-surface-variant text-[11px] uppercase tracking-wider border-b border-outline-variant/30">
+                                    <th className="px-4 py-2 font-bold">Nama Bengkel / Mitra</th>
+                                    <th className="px-4 py-2 font-bold">Keahlian</th>
+                                    <th className="px-4 py-2 font-bold">Layanan</th>
+                                    <th className="px-4 py-2 font-bold text-center">Status</th>
+                                    <th className="px-4 py-2 font-bold text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody className="text-[14px] divide-y divide-outline-variant/10">
+                            <tbody className="text-[13px] divide-y divide-outline-variant/10">
                                 {partners.map((partner) => {
                                     const profile = partner.mitra_profile || partner.mitraProfile;
                                     const capability = profile?.vehicle_type_capability || 'Tidak ditentukan';
@@ -168,7 +168,7 @@ const MitraManagement = () => {
 
                                     return (
                                         <tr key={partner.id} className="hover:bg-surface-container-low transition-colors group">
-                                            <td className="px-10 py-6">
+                                            <td className="px-4 py-1.5">
                                                 <div className="flex items-center gap-4">
                                                     <img 
                                                         src={getImageUrl(profile?.avatar) || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200&auto=format&fit=crop'} 
@@ -181,17 +181,17 @@ const MitraManagement = () => {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-10 py-6">
+                                            <td className="px-4 py-1.5">
                                                 <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
                                                     {capability}
                                                 </span>
                                             </td>
-                                            <td className="px-10 py-6">
+                                            <td className="px-4 py-1.5">
                                                 <span className="font-semibold text-on-surface-variant text-[12px]">
                                                     {isMobile}
                                                 </span>
                                             </td>
-                                            <td className="px-10 py-6 text-center">
+                                            <td className="px-4 py-1.5 text-center">
                                                 <div className="flex flex-col gap-1 items-center">
                                                     {isVerified ? (
                                                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-green-50 text-green-700 border border-green-200">
@@ -215,7 +215,7 @@ const MitraManagement = () => {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-10 py-6 text-right">
+                                            <td className="px-4 py-1.5 text-right">
                                                 <button 
                                                     onClick={() => handleViewDetail(partner.id)}
                                                     className="bg-primary-fixed hover:bg-primary hover:text-white text-primary font-bold px-4 py-2 rounded-lg text-[12px] transition-all active:scale-95 shadow-sm"

@@ -123,18 +123,18 @@ const UserManagement = () => {
                     ) : (
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                    <th className="px-10 py-5 font-bold">Pengguna</th>
-                                    <th className="px-10 py-5 font-bold">Peran & Izin</th>
-                                    <th className="px-10 py-5 font-bold">Kontak</th>
-                                    <th className="px-10 py-5 font-bold text-center">Status</th>
-                                    <th className="px-10 py-5 font-bold text-right">Aksi</th>
+                                <tr className="bg-surface-container-low text-on-surface-variant text-[11px] uppercase tracking-wider border-b border-outline-variant/30">
+                                    <th className="px-4 py-2 font-bold">Pengguna</th>
+                                    <th className="px-4 py-2 font-bold">Peran & Izin</th>
+                                    <th className="px-4 py-2 font-bold">Kontak</th>
+                                    <th className="px-4 py-2 font-bold text-center">Status</th>
+                                    <th className="px-4 py-2 font-bold text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody className="text-[14px] divide-y divide-outline-variant/10">
+                            <tbody className="text-[13px] divide-y divide-outline-variant/10">
                                 {users.map((user) => (
                                     <tr key={user.id} className="hover:bg-surface-container-low transition-colors group">
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <div className="flex items-center gap-4">
                                                 <div className="h-10 w-10 rounded-xl bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center font-bold text-sm">
                                                     {user.name.charAt(0)}
@@ -145,7 +145,7 @@ const UserManagement = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <div className="flex items-center gap-2">
                                                 <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
                                                     user.roles?.[0]?.name === 'admin' ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-surface-container text-on-surface-variant'
@@ -154,14 +154,14 @@ const UserManagement = () => {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <div className="flex flex-col gap-1 text-[12px] font-semibold text-on-surface-variant">
                                                 <div className="flex items-center gap-2">
                                                     <Phone size={12} className="text-outline" /> {user.phone}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6 text-center">
+                                        <td className="px-4 py-1.5 text-center">
                                             {user.roles?.[0]?.name === 'partner' ? (
                                                 (user.mitra_profile?.status_verified || user.mitraProfile?.status_verified) ? (
                                                     <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">
@@ -181,7 +181,7 @@ const UserManagement = () => {
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="px-10 py-6 text-right">
+                                        <td className="px-4 py-1.5 text-right">
                                             <button className="text-primary font-bold hover:underline transition-all active:scale-95">
                                                 Kelola
                                             </button>

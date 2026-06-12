@@ -99,25 +99,25 @@ const AuditLogs = () => {
                     ) : (
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                    <th className="px-10 py-5 font-bold">Waktu</th>
-                                    <th className="px-10 py-5 font-bold">Aktor</th>
-                                    <th className="px-10 py-5 font-bold">Modul</th>
-                                    <th className="px-10 py-5 font-bold">Tindakan</th>
-                                    <th className="px-10 py-5 font-bold">Keterangan</th>
-                                    <th className="px-10 py-5 font-bold text-right">Detail</th>
+                                <tr className="bg-surface-container-low text-on-surface-variant text-[11px] uppercase tracking-wider border-b border-outline-variant/30">
+                                    <th className="px-4 py-2 font-bold">Waktu</th>
+                                    <th className="px-4 py-2 font-bold">Aktor</th>
+                                    <th className="px-4 py-2 font-bold">Modul</th>
+                                    <th className="px-4 py-2 font-bold">Tindakan</th>
+                                    <th className="px-4 py-2 font-bold">Keterangan</th>
+                                    <th className="px-4 py-2 font-bold text-right">Detail</th>
                                 </tr>
                             </thead>
-                            <tbody className="text-[14px] divide-y divide-outline-variant/10">
+                            <tbody className="text-[13px] divide-y divide-outline-variant/10">
                                 {logs.map((log) => (
                                     <tr key={log.id} className="hover:bg-surface-container-low transition-colors group">
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <div className="flex items-center gap-2 text-on-surface-variant font-semibold text-[13px]">
                                                 <Clock size={14} className="text-outline" />
                                                 {new Date(log.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-outline">
                                                     <User size={14} />
@@ -125,12 +125,12 @@ const AuditLogs = () => {
                                                 <span className="font-bold text-primary">{log.user?.name || 'Sistem Otomatis'}</span>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${getModuleColor(log.module)}`}>
                                                 {moduleLabels[log.module.toLowerCase()] || log.module}
                                             </span>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-1.5 h-1.5 bg-secondary rounded-full"></div>
                                                 <span className="font-bold text-on-surface capitalize">
@@ -138,12 +138,12 @@ const AuditLogs = () => {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <p className="text-[13px] font-medium text-on-surface-variant max-w-xs truncate" title={log.description}>
                                                 {log.description}
                                             </p>
                                         </td>
-                                        <td className="px-10 py-6 text-right">
+                                        <td className="px-4 py-1.5 text-right">
                                             <button className="text-outline hover:text-primary transition-all p-1">
                                                 <Eye size={18} />
                                             </button>

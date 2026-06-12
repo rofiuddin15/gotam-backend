@@ -74,18 +74,18 @@ const PartnerVerification = () => {
                     ) : Array.isArray(requests) && requests.length > 0 ? (
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                    <th className="px-10 py-5 font-bold">Nama Bengkel</th>
-                                    <th className="px-10 py-5 font-bold">Detail Pemilik</th>
-                                    <th className="px-10 py-5 font-bold">Tanggal Pendaftaran</th>
-                                    <th className="px-10 py-5 font-bold">Dokumen Bisnis</th>
-                                    <th className="px-10 py-5 font-bold text-right">Keputusan</th>
+                                <tr className="bg-surface-container-low text-on-surface-variant text-[11px] uppercase tracking-wider border-b border-outline-variant/30">
+                                    <th className="px-4 py-2 font-bold">Nama Bengkel</th>
+                                    <th className="px-4 py-2 font-bold">Detail Pemilik</th>
+                                    <th className="px-4 py-2 font-bold">Tanggal Pendaftaran</th>
+                                    <th className="px-4 py-2 font-bold">Dokumen Bisnis</th>
+                                    <th className="px-4 py-2 font-bold text-right">Keputusan</th>
                                 </tr>
                             </thead>
-                            <tbody className="text-[14px] divide-y divide-outline-variant/10">
+                            <tbody className="text-[13px] divide-y divide-outline-variant/10">
                                 {requests.map((req) => (
                                     <tr key={req.id} className="hover:bg-surface-container-low transition-colors group">
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 bg-tertiary-fixed text-on-tertiary-fixed rounded-xl flex items-center justify-center transition-all">
                                                     <Building2 size={24} />
@@ -98,7 +98,7 @@ const PartnerVerification = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <div className="flex flex-col gap-1">
                                                 <p className="font-bold text-on-surface flex items-center gap-2">
                                                     <User size={14} className="text-outline" /> {req.user?.name}
@@ -108,19 +108,19 @@ const PartnerVerification = () => {
                                                 </p>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <div className="flex items-center gap-2 text-on-surface font-semibold">
                                                 <Calendar size={16} className="text-outline" />
                                                 {new Date(req.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container text-primary font-bold text-[11px] uppercase tracking-wider border border-outline-variant/30">
                                                 <Clock size={12} />
                                                 <span>Sedang Ditinjau</span>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6 text-right">
+                                        <td className="px-4 py-1.5 text-right">
                                             <div className="flex justify-end gap-2">
                                                 <button 
                                                     onClick={() => handleVerify(req.id, 'rejected')}

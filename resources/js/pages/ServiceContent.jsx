@@ -129,17 +129,17 @@ const ServiceContent = () => {
                     ) : (
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                    <th className="px-10 py-5 font-bold">Nama Kategori</th>
-                                    <th className="px-10 py-5 font-bold">Harga Dasar</th>
-                                    <th className="px-10 py-5 font-bold">Tipe Kendaraan</th>
-                                    <th className="px-10 py-5 font-bold text-right">Aksi</th>
+                                <tr className="bg-surface-container-low text-on-surface-variant text-[11px] uppercase tracking-wider border-b border-outline-variant/30">
+                                    <th className="px-4 py-2 font-bold">Nama Kategori</th>
+                                    <th className="px-4 py-2 font-bold">Harga Dasar</th>
+                                    <th className="px-4 py-2 font-bold">Tipe Kendaraan</th>
+                                    <th className="px-4 py-2 font-bold text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody className="text-[14px] divide-y divide-outline-variant/10">
+                            <tbody className="text-[13px] divide-y divide-outline-variant/10">
                                 {filteredCategories.map((cat) => (
                                     <tr key={cat.id} className="hover:bg-surface-container-low transition-colors group">
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-10 h-10 bg-tertiary-fixed text-on-tertiary-fixed rounded-xl flex items-center justify-center font-bold">
                                                     <Wrench size={20} />
@@ -147,16 +147,16 @@ const ServiceContent = () => {
                                                 <span className="font-bold text-primary">{cat.name}</span>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <span className="font-bold text-on-surface">Rp {Number(cat.base_price).toLocaleString('id-ID')}</span>
                                         </td>
-                                        <td className="px-10 py-6">
+                                        <td className="px-4 py-1.5">
                                             <div className="flex items-center gap-2">
                                                 <span className="px-3 py-1 bg-primary-fixed text-primary rounded-lg text-[10px] font-bold uppercase tracking-wider">{vehicleTypeLabels[cat.vehicle_type?.toLowerCase()] || cat.vehicle_type}</span>
                                                 <span className="px-3 py-1 bg-surface-container text-on-surface-variant rounded-lg text-[10px] font-bold uppercase tracking-wider">{tireTypeLabels[cat.tire_type?.toLowerCase()] || cat.tire_type?.replace('_', ' ')}</span>
                                             </div>
                                         </td>
-                                        <td className="px-10 py-6 text-right">
+                                        <td className="px-4 py-1.5 text-right">
                                             <div className="flex justify-end gap-3">
                                                 <button className="text-outline hover:text-primary transition-all p-1"><Edit3 size={18} /></button>
                                                 <button 

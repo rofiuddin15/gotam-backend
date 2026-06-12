@@ -232,20 +232,20 @@ const Dashboard = () => {
                     ) : (
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-surface-container-low text-on-surface-variant text-[12px] uppercase tracking-widest border-b border-outline-variant/30">
-                                    <th className="p-4 font-bold w-24">ID</th>
-                                    <th className="p-4 font-bold">Pelanggan</th>
-                                    <th className="p-4 font-bold">Tipe Layanan</th>
-                                    <th className="p-4 font-bold">Mitra Ditugaskan</th>
-                                    <th className="p-4 font-bold text-center w-32">Status</th>
+                                <tr className="bg-surface-container-low text-on-surface-variant text-[11px] uppercase tracking-wider border-b border-outline-variant/30">
+                                    <th className="px-4 py-2 font-bold w-24">ID</th>
+                                    <th className="px-4 py-2 font-bold">Pelanggan</th>
+                                    <th className="px-4 py-2 font-bold">Tipe Layanan</th>
+                                    <th className="px-4 py-2 font-bold">Mitra Ditugaskan</th>
+                                    <th className="px-4 py-2 font-bold text-center w-32">Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="text-[14px] divide-y divide-outline-variant/10">
+                            <tbody className="text-[13px] divide-y divide-outline-variant/10">
                                 {monitoring.length > 0 ? (
                                     monitoring.map((row, i) => (
                                         <tr key={i} className="hover:bg-surface-container-low transition-colors group">
-                                            <td className="p-4 font-bold text-primary">#BK-{row.id}</td>
-                                            <td className="p-4">
+                                            <td className="px-4 py-1.5 font-bold text-primary">#BK-{row.id}</td>
+                                            <td className="px-4 py-1.5">
                                                 <div className="flex items-center gap-3">
                                                     <div className="h-8 w-8 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center font-bold text-xs">
                                                         {row.customer?.name?.charAt(0) || 'C'}
@@ -253,13 +253,13 @@ const Dashboard = () => {
                                                     <span className="text-on-surface font-semibold">{row.customer?.name}</span>
                                                 </div>
                                             </td>
-                                            <td className="p-4 text-on-surface-variant font-medium">
+                                            <td className="px-4 py-1.5 text-on-surface-variant font-medium">
                                                 {(vehicleTypeLabels[row.service_category?.vehicle_type?.toLowerCase()] || row.service_category?.vehicle_type)} - {(tireTypeLabels[row.service_category?.tire_type?.toLowerCase()] || row.service_category?.tire_type?.replace('_', ' '))}
                                             </td>
-                                            <td className="p-4 text-on-surface font-medium">
+                                            <td className="px-4 py-1.5 text-on-surface font-medium">
                                                 {row.mitra?.name || <span className="text-amber-600 animate-pulse font-semibold">Mencari Mekanik...</span>}
                                             </td>
-                                            <td className="p-4 text-center">
+                                            <td className="px-4 py-1.5 text-center">
                                                 <span className={`inline-block px-3 py-1 rounded-full font-bold text-[11px] whitespace-nowrap bg-secondary-container text-on-secondary-container capitalize`}>
                                                     {statusLabels[row.status?.toLowerCase()] || row.status?.replace(/_/g, ' ')}
                                                 </span>
@@ -268,7 +268,7 @@ const Dashboard = () => {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="5" className="p-10 text-center text-on-surface-variant font-bold">
+                                        <td colSpan="5" className="px-4 py-3 text-center text-on-surface-variant font-bold">
                                             Tidak ada pesanan aktif saat ini.
                                         </td>
                                     </tr>

@@ -18,6 +18,8 @@ class Booking extends Model
         'geo_location_mitra',
         'final_price',
         'notes',
+        'rating',
+        'review',
     ];
 
     protected $casts = [
