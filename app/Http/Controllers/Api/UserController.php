@@ -12,12 +12,17 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $role = $request->query('role');
+        $excludeRole = $request->query('exclude_role');
         $search = $request->query('search');
 
         $query = User::with(['roles', 'mitraProfile']);
 
         if ($role) {
             $query->role($role);
+        } elseif ($excludeRole) {
+            $query->whereDoesntHave('roles', function($q) use ($excludeRole) {
+                $q->where('name', $excludeRole);
+            });
         }
 
         if ($search) {
@@ -72,5 +77,14 @@ class UserController extends Controller
             'message' => 'Data pengguna berhasil diperbarui.',
             'user' => $user->load('roles')
         ]);
+    }
+
+    /**
+     * Show single user details with profile, wallet, and services.
+     */
+    public function show(User $user)
+    {
+        $user->load(['roles', 'mitraProfile', 'services', 'wallet']);
+        return response()->json($user);
     }
 }

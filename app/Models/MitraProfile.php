@@ -15,6 +15,8 @@ class MitraProfile extends Model
         'is_mobile',
         'status_verified',
         'is_online',
+        'avatar',
+        'banner',
         'lat',
         'lng',
     ];

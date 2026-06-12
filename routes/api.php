@@ -56,6 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // User Management
         Route::get('/admin/users', [UserController::class, 'index']);
+        Route::get('/admin/users/{user}', [UserController::class, 'show']);
 
         // Partner Verification
         Route::get('/admin/partners/pending', [PartnerVerificationController::class, 'index']);

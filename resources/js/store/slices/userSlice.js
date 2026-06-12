@@ -3,10 +3,10 @@ import api from '../../utils/api';
 
 export const fetchUsers = createAsyncThunk(
     'user/fetchUsers',
-    async ({ role, search, page = 1 }, { rejectWithValue }) => {
+    async ({ role, search, exclude_role, page = 1 }, { rejectWithValue }) => {
         try {
             const response = await api.get('/admin/users', {
-                params: { role, search, page }
+                params: { role, search, exclude_role, page }
             });
             return response.data;
         } catch (error) {

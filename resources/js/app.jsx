@@ -8,6 +8,7 @@ import AdminLayout from './layouts/AdminLayout';
 import Dashboard from './pages/Dashboard';
 import UserManagement from './pages/UserManagement';
 import PartnerVerification from './pages/PartnerVerification';
+import MitraManagement from './pages/MitraManagement';
 import ServiceContent from './pages/ServiceContent';
 import FinancialReports from './pages/FinancialReports';
 import RoleManagement from './pages/RoleManagement';
@@ -44,6 +45,7 @@ function App() {
                     >
                         <Route index element={<Dashboard />} />
                         <Route path="users" element={<UserManagement />} />
+                        <Route path="mitra" element={<MitraManagement />} />
                         <Route path="partners" element={<PartnerVerification />} />
                         <Route path="services" element={<ServiceContent />} />
                         <Route path="reports" element={<FinancialReports />} />

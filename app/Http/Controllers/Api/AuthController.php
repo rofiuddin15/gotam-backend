@@ -110,6 +110,8 @@ class AuthController extends Controller
         if ($user->role === 'partner') {
             $rules['vehicle_type_capability'] = 'required|string';
             $rules['is_mobile'] = 'required|boolean';
+            $rules['avatar'] = 'nullable|image|max:2048';
+            $rules['banner'] = 'nullable|image|max:2048';
         }
 
         $request->validate($rules);
@@ -125,10 +127,20 @@ class AuthController extends Controller
         $user->save();
 
         if ($user->role === 'partner') {
-            $user->mitraProfile()->update([
+            $profileData = [
                 'vehicle_type_capability' => $request->vehicle_type_capability,
                 'is_mobile' => $request->is_mobile,
-            ]);
+            ];
+
+            if ($request->hasFile('avatar')) {
+                $profileData['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            }
+
+            if ($request->hasFile('banner')) {
+                $profileData['banner'] = $request->file('banner')->store('banners', 'public');
+            }
+
+            $user->mitraProfile()->update($profileData);
         }
 
         if ($user->role === 'partner') {

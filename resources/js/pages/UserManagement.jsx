@@ -21,13 +21,22 @@ const UserManagement = () => {
     const [localSearch, setLocalSearch] = useState(filters.search);
 
     useEffect(() => {
-        dispatch(fetchUsers({ ...filters, page: 1 }));
+        dispatch(fetchUsers({ 
+            ...filters, 
+            exclude_role: filters.role ? undefined : 'partner',
+            page: 1 
+        }));
     }, [dispatch, filters.role]);
 
     const handleSearch = (e) => {
         e.preventDefault();
         dispatch(setFilters({ search: localSearch }));
-        dispatch(fetchUsers({ ...filters, search: localSearch, page: 1 }));
+        dispatch(fetchUsers({ 
+            ...filters, 
+            search: localSearch, 
+            exclude_role: filters.role ? undefined : 'partner',
+            page: 1 
+        }));
     };
 
     const handleRoleFilter = (role) => {
@@ -35,7 +44,11 @@ const UserManagement = () => {
     };
 
     const handlePageChange = (page) => {
-        dispatch(fetchUsers({ ...filters, page }));
+        dispatch(fetchUsers({ 
+            ...filters, 
+            exclude_role: filters.role ? undefined : 'partner',
+            page 
+        }));
     };
 
     const roleLabels = {
@@ -66,7 +79,6 @@ const UserManagement = () => {
                         {[
                             { label: 'Semua Pengguna', value: '' },
                             { label: 'Pelanggan', value: 'customer' },
-                            { label: 'Mitra', value: 'partner' },
                             { label: 'Staf', value: 'admin' }
                         ].map((role) => (
                             <button 

@@ -97,4 +97,38 @@ class AuthTest extends TestCase
             ->assertJsonPath('user.mitra_profile.vehicle_type_capability', 'Motor')
             ->assertJsonPath('user.mitra_profile.is_mobile', true);
     }
+
+    public function test_partner_can_update_profile_images()
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $user = User::factory()->create([
+            'role' => 'partner',
+        ]);
+        $user->assignRole('partner');
+
+        $avatar = \Illuminate\Http\UploadedFile::fake()->image('avatar.jpg');
+        $banner = \Illuminate\Http\UploadedFile::fake()->image('banner.jpg');
+
+        $response = $this->actingAs($user)
+            ->postJson('/api/me', [
+                '_method' => 'PUT',
+                'name' => 'Bengkel Baru',
+                'email' => 'new@gotam.com',
+                'phone' => '082222222222',
+                'vehicle_type_capability' => 'Motor',
+                'is_mobile' => true,
+                'avatar' => $avatar,
+                'banner' => $banner,
+            ]);
+
+        $response->assertStatus(200);
+
+        $user->refresh();
+        $this->assertNotNull($user->mitraProfile->avatar);
+        $this->assertNotNull($user->mitraProfile->banner);
+
+        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($user->mitraProfile->avatar);
+        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($user->mitraProfile->banner);
+    }
 }

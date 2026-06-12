@@ -7,44 +7,45 @@
 @source '../**/*.jsx';
 
 @theme {
-    /* Custom Colors from Mockup */
-    --color-primary: #000f22;
-    --color-primary-container: #0a2540;
-    --color-primary-fixed: #d2e4ff;
-    --color-primary-fixed-dim: #b0c8eb;
+    /* Custom Colors from AdminLTE Light Theme */
+    --color-primary: #007bff;
+    --color-primary-container: #0056b3;
+    --color-primary-fixed: #cce5ff;
+    --color-primary-fixed-dim: #b8daff;
     
-    --color-secondary: #705d00;
-    --color-secondary-container: #fcd400;
-    --color-secondary-fixed: #ffe16d;
+    --color-secondary: #6c757d;
+    --color-secondary-container: #007bff;
+    --color-secondary-fixed: #e2e3e5;
     
-    --color-tertiary: #000c30;
-    --color-tertiary-container: #001f5e;
-    --color-tertiary-fixed: #dbe1ff;
-    --color-tertiary-fixed-dim: #b4c5ff;
+    --color-tertiary: #17a2b8;
+    --color-tertiary-container: #d1ecf1;
+    --color-tertiary-fixed: #bee5eb;
+    --color-tertiary-fixed-dim: #abdde5;
 
-    --color-surface: #f7fafc;
-    --color-surface-bright: #f7fafc;
-    --color-surface-dim: #d7dadc;
-    --color-surface-variant: #e0e3e5;
-    --color-surface-container: #ebeef0;
-    --color-surface-container-low: #f1f4f6;
-    --color-surface-container-high: #e5e9eb;
-    --color-surface-container-highest: #e0e3e5;
+    --color-surface: #ffffff;
+    --color-surface-bright: #ffffff;
+    --color-surface-dim: #f4f6f9;
+    --color-surface-variant: #e9ecef;
+    --color-surface-container: #ffffff;
+    --color-surface-container-low: #f8f9fa;
+    --color-surface-container-high: #e9ecef;
+    --color-surface-container-highest: #dee2e6;
     --color-surface-container-lowest: #ffffff;
 
-    --color-background: #f7fafc;
-    --color-outline: #74777e;
-    --color-outline-variant: #c4c6ce;
+    --color-background: #f4f6f9;
+    --color-outline: #6c757d;
+    --color-outline-variant: #dee2e6;
     
     --color-on-primary: #ffffff;
     --color-on-secondary: #ffffff;
-    --color-on-surface: #181c1e;
-    --color-on-surface-variant: #43474d;
-    --color-on-background: #181c1e;
+    --color-on-secondary-container: #ffffff;
+    --color-on-surface: #343a40;
+    --color-on-surface-variant: #495057;
+    --color-on-background: #212529;
     
-    --color-error: #ba1a1a;
-    --color-error-container: #ffdad6;
-    --color-on-error-container: #93000a;
+    --color-error: #dc3545;
+    --color-error-container: #f8d7da;
+    --color-on-error-container: #721c24;
 
     /* Spacing & Radii */
     --radius-lg: 0.5rem;

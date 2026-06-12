@@ -12,7 +12,8 @@ import {
     HelpCircle, 
     LogOut, 
     Search, 
-    Bell
+    Bell,
+    Building2
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -30,6 +31,7 @@ const AdminLayout = () => {
     const menuItems = [
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/admin' },
         { icon: <Users size={20} />, label: 'Manajemen Pengguna', path: '/admin/users' },
+        { icon: <Building2 size={20} />, label: 'Manajemen Mitra', path: '/admin/mitra' },
         { icon: <ShieldCheck size={20} />, label: 'Verifikasi Mitra', path: '/admin/partners' },
         { icon: <Wrench size={20} />, label: 'Konten Layanan', path: '/admin/services' },
         { icon: <BarChart3 size={20} />, label: 'Laporan', path: '/admin/reports' },
