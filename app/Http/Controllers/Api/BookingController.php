@@ -33,11 +33,12 @@ class BookingController extends Controller
     {
         $request->validate([
             'vehicle_type' => 'required|in:Mobil,Motor,Truk',
-            'tire_type' => 'required|in:Tubeless,Ban Dalam',
-            'lat' => 'required|numeric',
-            'lng' => 'required|numeric',
-            'address' => 'required|string',
-            'notes' => 'nullable|string',
+            'tire_type'    => 'required|in:Tubeless,Ban Dalam',
+            'lat'          => 'required|numeric',
+            'lng'          => 'required|numeric',
+            'address'      => 'required|string',
+            'notes'        => 'nullable|string',
+            'mitra_id'     => 'nullable|exists:users,id',
         ]);
 
         // Find the appropriate service category to get base price
@@ -49,28 +50,40 @@ class BookingController extends Controller
             return response()->json(['message' => 'Layanan tidak tersedia untuk kombinasi ini.'], 422);
         }
 
+        $mitraId   = $request->mitra_id ?? null;
+        $status    = $mitraId ? 'heading_to_location' : 'searching';
+        $statusMsg = $mitraId
+            ? 'Pesanan diterima oleh mitra pilihan Anda.'
+            : 'Pesanan sedang mencari mekanik terdekat.';
+
         $booking = Booking::create([
-            'customer_id' => Auth::id(),
+            'customer_id'         => Auth::id(),
+            'mitra_id'            => $mitraId,
             'service_category_id' => $category->id,
-            'status' => 'searching',
-            'geo_location_user' => [
-                'lat' => $request->lat,
-                'lng' => $request->lng,
+            'status'              => $status,
+            'geo_location_user'   => [
+                'lat'     => $request->lat,
+                'lng'     => $request->lng,
                 'address' => $request->address,
             ],
             'final_price' => $category->base_price,
-            'notes' => $request->notes,
+            'notes'       => $request->notes,
         ]);
 
         // Record Initial Log
-        $booking->logStatus('searching', 'Pesanan sedang mencari mekanik terdekat.');
+        $booking->logStatus($status, $statusMsg);
 
-        // Broadcast to nearby partners
-        event(new BookingCreated($booking));
+        if ($mitraId) {
+            // Notify the specific partner directly
+            event(new BookingAccepted($booking));
+        } else {
+            // Broadcast to all nearby partners
+            event(new BookingCreated($booking));
+        }
 
         return response()->json([
-            'message' => 'Mencari mekanik terdekat...',
-            'booking' => $booking->load('serviceCategory'),
+            'message' => $mitraId ? 'Pesanan langsung dikirim ke mitra pilihan.' : 'Mencari mekanik terdekat...',
+            'booking' => $booking->load('serviceCategory', 'mitra.mitraProfile'),
         ], 201);
     }
 
