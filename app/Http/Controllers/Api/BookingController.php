@@ -14,6 +14,19 @@ use Illuminate\Support\Facades\Auth;
 class BookingController extends Controller
 {
     /**
+     * Get list of searching bookings (available requests)
+     */
+    public function index()
+    {
+        $bookings = Booking::where('status', 'searching')
+            ->with(['customer', 'serviceCategory'])
+            ->latest()
+            ->get();
+
+        return response()->json($bookings);
+    }
+
+    /**
      * Create a new booking (Quick Request / Panic Button)
      */
     public function store(Request $request)
@@ -66,11 +79,20 @@ class BookingController extends Controller
      */
     public function activeBooking()
     {
-        $booking = Booking::where('customer_id', Auth::id())
-            ->whereIn('status', ['searching', 'heading_to_location', 'repairing'])
-            ->with(['mitra', 'serviceCategory'])
-            ->latest()
-            ->first();
+        $user = Auth::user();
+        if ($user->role === 'partner') {
+            $booking = Booking::where('mitra_id', $user->id)
+                ->whereIn('status', ['heading_to_location', 'arrived', 'repairing'])
+                ->with(['customer', 'serviceCategory'])
+                ->latest()
+                ->first();
+        } else {
+            $booking = Booking::where('customer_id', $user->id)
+                ->whereIn('status', ['searching', 'heading_to_location', 'arrived', 'repairing'])
+                ->with(['mitra', 'serviceCategory'])
+                ->latest()
+                ->first();
+        }
 
         if (!$booking) {
             return response()->json(['message' => 'Tidak ada pesanan aktif.'], 404);

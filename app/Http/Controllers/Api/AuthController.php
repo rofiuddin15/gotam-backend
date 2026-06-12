@@ -32,6 +32,10 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        if ($user->role === 'partner') {
+            $user->load(['mitraProfile', 'wallet']);
+        }
+
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
@@ -42,19 +46,27 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email' => 'required|string',
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $loginInput = $request->email;
+
+        $user = User::where('email', $loginInput)
+            ->orWhere('phone', $loginInput)
+            ->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['Credentials provided are incorrect.'],
+                'email' => ['Kredensial yang diberikan salah.'],
             ]);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        if ($user->role === 'partner') {
+            $user->load(['mitraProfile', 'wallet']);
+        }
 
         return response()->json([
             'access_token' => $token,
@@ -65,7 +77,10 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $token = $request->user()->currentAccessToken();
+        if (method_exists($token, 'delete')) {
+            $token->delete();
+        }
 
         return response()->json([
             'message' => 'Berhasil keluar dari sistem.'
@@ -74,6 +89,55 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        $user = $request->user();
+        if ($user->role === 'partner') {
+            $user->load(['mitraProfile', 'wallet']);
+        }
+        return response()->json($user);
+    }
+
+    public function updateMe(Request $request)
+    {
+        $user = $request->user();
+
+        $rules = [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|unique:users,email,' . $user->id,
+            'phone' => 'required|string|unique:users,phone,' . $user->id,
+            'password' => 'nullable|string|min:8',
+        ];
+
+        if ($user->role === 'partner') {
+            $rules['vehicle_type_capability'] = 'required|string';
+            $rules['is_mobile'] = 'required|boolean';
+        }
+
+        $request->validate($rules);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->phone = $request->phone;
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        if ($user->role === 'partner') {
+            $user->mitraProfile()->update([
+                'vehicle_type_capability' => $request->vehicle_type_capability,
+                'is_mobile' => $request->is_mobile,
+            ]);
+        }
+
+        if ($user->role === 'partner') {
+            $user->load(['mitraProfile', 'wallet']);
+        }
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui.',
+            'user' => $user,
+        ]);
     }
 }

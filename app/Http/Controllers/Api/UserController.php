@@ -14,7 +14,7 @@ class UserController extends Controller
         $role = $request->query('role');
         $search = $request->query('search');
 
-        $query = User::with('roles');
+        $query = User::with(['roles', 'mitraProfile']);
 
         if ($role) {
             $query->role($role);

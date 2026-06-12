@@ -22,10 +22,15 @@ class PartnerVerificationController extends Controller
         return response()->json($partners);
     }
 
-    public function verify(User $user)
+    public function verify(Request $request, User $user)
     {
-        $user->mitraProfile()->update(['status_verified' => true]);
+        $status = $request->input('status', 'verified');
+        $isVerified = $status === 'verified';
 
-        return response()->json(['message' => 'Mitra berhasil diverifikasi.']);
+        $user->mitraProfile()->update(['status_verified' => $isVerified]);
+
+        return response()->json([
+            'message' => $isVerified ? 'Mitra berhasil diverifikasi.' : 'Verifikasi mitra ditolak.'
+        ]);
     }
 }

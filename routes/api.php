@@ -15,15 +15,18 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\BankAccountController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/me', [AuthController::class, 'updateMe']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Booking Routes
+    Route::get('/bookings', [BookingController::class, 'index']);
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/bookings/active', [BookingController::class, 'activeBooking']);
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel']);
@@ -38,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/partner/withdrawals', [WithdrawalController::class, 'store']);
     Route::get('/partner/withdrawals', [WithdrawalController::class, 'history']);
     Route::apiResource('/partner/catalog', PartnerServiceController::class);
+    Route::apiResource('/partner/bank-accounts', BankAccountController::class);
 
     // Wallet Routes
     Route::post('/wallet/topup', [WalletController::class, 'topup']);

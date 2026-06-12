@@ -5,22 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MitraProfile extends Model
+class BankAccount extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
-        'vehicle_type_capability',
-        'is_mobile',
-        'status_verified',
-        'lat',
-        'lng',
-    ];
-
-    protected $casts = [
-        'is_mobile' => 'boolean',
-        'status_verified' => 'boolean',
+        'bank_name',
+        'account_number',
+        'account_name',
     ];
 
     public function user()

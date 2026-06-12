@@ -17,7 +17,7 @@ export const verifyPartner = createAsyncThunk(
     'partner/verify',
     async ({ id, status }, { rejectWithValue }) => {
         try {
-            const response = await api.post(`/admin/partner-verifications/${id}/verify`, { status });
+            const response = await api.post(`/admin/partners/${id}/verify`, { status });
             return { id, status };
         } catch (error) {
             return rejectWithValue(error.response.data);

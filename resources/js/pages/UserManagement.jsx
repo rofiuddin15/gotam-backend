@@ -150,10 +150,24 @@ const UserManagement = () => {
                                             </div>
                                         </td>
                                         <td className="px-10 py-6 text-center">
-                                            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">
-                                                <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                                                Aktif
-                                            </span>
+                                            {user.roles?.[0]?.name === 'partner' ? (
+                                                (user.mitra_profile?.status_verified || user.mitraProfile?.status_verified) ? (
+                                                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">
+                                                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                                                        Terverifikasi
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100">
+                                                        <div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
+                                                        Pending Verifikasi
+                                                    </span>
+                                                )
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">
+                                                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                                                    Aktif
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-10 py-6 text-right">
                                             <button className="text-primary font-bold hover:underline transition-all active:scale-95">
