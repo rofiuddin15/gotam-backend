@@ -25,6 +25,20 @@ class StatsController extends Controller
               ->orWhereHas('roles', function($rq) { $rq->where('name', 'partner'); });
         })->where('created_at', '>=', now()->subDays(30))->count();
 
+        $partnersOnline = User::where(function($q) {
+            $q->where('role', 'partner')
+              ->orWhereHas('roles', function($rq) { $rq->where('name', 'partner'); });
+        })->whereHas('mitraProfile', function($q) {
+            $q->where('is_online', true);
+        })->count();
+
+        $partnersOffline = User::where(function($q) {
+            $q->where('role', 'partner')
+              ->orWhereHas('roles', function($rq) { $rq->where('name', 'partner'); });
+        })->whereHas('mitraProfile', function($q) {
+            $q->where('is_online', false);
+        })->count();
+
         // Database agnostic Monthly Revenue (Last 6 Months)
         $isSqlite = DB::connection()->getDriverName() === 'sqlite';
         $monthFormat = $isSqlite ? "strftime('%m', created_at)" : "MONTH(created_at)";
@@ -57,6 +71,8 @@ class StatsController extends Controller
                 'total_revenue' => 'Rp ' . number_format($platformRevenue, 2, ',', '.'),
                 'active_bookings' => $activeBookings,
                 'new_partners' => $newPartners,
+                'partners_online' => $partnersOnline,
+                'partners_offline' => $partnersOffline,
             ],
             'revenue_chart' => $monthlyRevenueRaw,
             'system_status' => [

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { 
     LayoutDashboard, 
     Users, 
@@ -17,6 +18,15 @@ import {
 const AdminLayout = () => {
     const location = useLocation();
     
+    // Select loading states from Redux
+    const isTransactionLoading = useSelector((state) => state.transaction?.loading);
+    const isDashboardLoading = useSelector((state) => state.dashboard?.loading);
+    const isPartnerLoading = useSelector((state) => state.partner?.loading);
+    const isServiceLoading = useSelector((state) => state.service?.loading);
+    const isUserLoading = useSelector((state) => state.user?.loading);
+
+    const isLoading = isTransactionLoading || isDashboardLoading || isPartnerLoading || isServiceLoading || isUserLoading;
+    
     const menuItems = [
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/admin' },
         { icon: <Users size={20} />, label: 'Manajemen Pengguna', path: '/admin/users' },
@@ -32,6 +42,16 @@ const AdminLayout = () => {
 
     return (
         <div className="flex h-screen bg-background text-on-background font-sans overflow-hidden">
+            <style>{`
+                @keyframes loadingBar {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(200%); }
+                }
+                .animate-loading-bar {
+                    animation: loadingBar 1.5s infinite ease-in-out;
+                }
+            `}</style>
+            
             {/* SideNavBar */}
             <nav className="hidden md:flex flex-col h-screen w-64 bg-surface-container border-r border-outline-variant shadow-md flex-shrink-0 z-50">
                 {/* Header */}
@@ -115,6 +135,13 @@ const AdminLayout = () => {
                         </div>
                     </div>
                 </header>
+
+                {/* Loading Bar */}
+                <div className="h-1 w-full bg-transparent overflow-hidden relative z-50">
+                    {isLoading && (
+                        <div className="h-full bg-primary w-1/2 rounded-full absolute top-0 left-0 animate-loading-bar" />
+                    )}
+                </div>
 
                 {/* Scrollable Dashboard Content */}
                 <div className="flex-1 overflow-y-auto p-6 pb-10 flex flex-col bg-background custom-scrollbar">

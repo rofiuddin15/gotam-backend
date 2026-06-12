@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Partner Routes
     Route::post('/partner/location', [\App\Http\Controllers\Api\PartnerController::class, 'updateLocation']);
+    Route::post('/partner/status', [\App\Http\Controllers\Api\PartnerController::class, 'updateStatus']);
     Route::post('/partner/withdrawals', [WithdrawalController::class, 'store']);
     Route::get('/partner/withdrawals', [WithdrawalController::class, 'history']);
     Route::apiResource('/partner/catalog', PartnerServiceController::class);

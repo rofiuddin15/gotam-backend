@@ -14,6 +14,7 @@ class MitraProfile extends Model
         'vehicle_type_capability',
         'is_mobile',
         'status_verified',
+        'is_online',
         'lat',
         'lng',
     ];
@@ -21,6 +22,7 @@ class MitraProfile extends Model
     protected $casts = [
         'is_mobile' => 'boolean',
         'status_verified' => 'boolean',
+        'is_online' => 'boolean',
     ];
 
     public function user()

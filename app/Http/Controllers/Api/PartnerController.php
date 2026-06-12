@@ -40,4 +40,25 @@ class PartnerController extends Controller
 
         return response()->json(['message' => 'Lokasi berhasil diperbarui.']);
     }
+
+    /**
+     * Update partner online status
+     */
+    public function updateStatus(Request $request)
+    {
+        $request->validate([
+            'is_online' => 'required|boolean',
+        ]);
+
+        $user = Auth::user();
+        
+        $user->mitraProfile()->update([
+            'is_online' => $request->is_online,
+        ]);
+
+        return response()->json([
+            'message' => 'Status online berhasil diperbarui.',
+            'is_online' => (bool)$user->mitraProfile->fresh()->is_online,
+        ]);
+    }
 }

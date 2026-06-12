@@ -685,7 +685,6 @@ const FinancialReports = () => {
                         variant="outlineVariant"
                         size="lg"
                         icon={RefreshCw}
-                        className={loading ? 'animate-spin' : ''}
                     >
                         Muat Ulang
                     </Button>

@@ -186,6 +186,23 @@ const Dashboard = () => {
                             <span className="h-3 w-3 rounded-full bg-[#10b981]"></span>
                         </div>
                         <div className="mt-6 pt-6 border-t border-outline-variant/20">
+                            <p className="text-[12px] font-black text-on-surface-variant mb-3 uppercase tracking-widest">STATUS KEAKTIFAN MITRA</p>
+                            <div className="flex justify-between items-center text-[14px] font-bold text-on-surface">
+                                <div className="flex items-center gap-2">
+                                    <span className="h-2.5 w-2.5 rounded-full bg-[#10b981]"></span>
+                                    <span>Online / Siaga:</span>
+                                </div>
+                                <span className="text-primary font-extrabold">{stats?.stats?.partners_online ?? 0} Mekanik</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[14px] font-bold text-on-surface mt-2.5">
+                                <div className="flex items-center gap-2">
+                                    <span className="h-2.5 w-2.5 rounded-full bg-outline"></span>
+                                    <span>Offline:</span>
+                                </div>
+                                <span className="text-on-surface-variant/80">{stats?.stats?.partners_offline ?? 0} Mekanik</span>
+                            </div>
+                        </div>
+                        <div className="mt-6 pt-6 border-t border-outline-variant/20">
                             <p className="text-[12px] font-black text-on-surface-variant mb-3 uppercase tracking-widest">ALUR PENDAFTARAN MITRA</p>
                             <div className="w-full bg-surface-container rounded-full h-2 mb-2">
                                 <div className="bg-primary h-2 rounded-full" style={{width: `${onboardingPercentage}%`}}></div>

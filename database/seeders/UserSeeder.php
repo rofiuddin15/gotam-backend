@@ -43,6 +43,7 @@ class UserSeeder extends Seeder
             'vehicle_type_capability' => 'Motor, Mobil',
             'is_mobile' => true,
             'status_verified' => true,
+            'is_online' => false,
             'lat' => -6.2147,
             'lng' => 106.8177,
         ]);
@@ -61,6 +62,7 @@ class UserSeeder extends Seeder
             'vehicle_type_capability' => 'Motor',
             'is_mobile' => true,
             'status_verified' => true,
+            'is_online' => true,
             'lat' => -6.2200,
             'lng' => 106.8000,
         ]);
