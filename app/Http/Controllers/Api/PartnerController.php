@@ -61,4 +61,54 @@ class PartnerController extends Controller
             'is_online' => (bool)$user->mitraProfile->fresh()->is_online,
         ]);
     }
+
+    /**
+     * Get nearby verified & online partners (for customer booking screen)
+     */
+    public function nearby(Request $request)
+    {
+        $customerLat = (float) $request->query('lat', -6.2146);
+        $customerLng = (float) $request->query('lng', 106.8451);
+
+        $partners = \App\Models\User::where('role', 'partner')
+            ->whereHas('mitraProfile', function ($q) {
+                $q->where('status_verified', true)
+                  ->where('is_online', true)
+                  ->whereNotNull('lat')
+                  ->whereNotNull('lng');
+            })
+            ->with(['mitraProfile'])
+            ->get()
+            ->map(function ($partner) use ($customerLat, $customerLng) {
+                $profile = $partner->mitraProfile;
+                $lat = (float) $profile->lat;
+                $lng = (float) $profile->lng;
+
+                // Haversine distance in km
+                $earthRadius = 6371;
+                $dLat = deg2rad($lat - $customerLat);
+                $dLng = deg2rad($lng - $customerLng);
+                $a = sin($dLat / 2) * sin($dLat / 2)
+                    + cos(deg2rad($customerLat)) * cos(deg2rad($lat))
+                    * sin($dLng / 2) * sin($dLng / 2);
+                $distance = $earthRadius * 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+                return [
+                    'id'             => $partner->id,
+                    'name'           => $partner->name,
+                    'phone'          => $partner->phone,
+                    'avatar'         => $profile->avatar,
+                    'lat'            => $lat,
+                    'lng'            => $lng,
+                    'distance'       => round($distance, 2),
+                    'distance_label' => $distance < 1
+                        ? round($distance * 1000) . ' m'
+                        : round($distance, 1) . ' km',
+                ];
+            })
+            ->sortBy('distance')
+            ->values();
+
+        return response()->json($partners);
+    }
 }

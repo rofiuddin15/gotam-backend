@@ -89,7 +89,7 @@ class BookingController extends Controller
         } else {
             $booking = Booking::where('customer_id', $user->id)
                 ->whereIn('status', ['searching', 'heading_to_location', 'arrived', 'repairing'])
-                ->with(['mitra', 'serviceCategory'])
+                ->with(['mitra.mitraProfile', 'serviceCategory'])
                 ->latest()
                 ->first();
         }

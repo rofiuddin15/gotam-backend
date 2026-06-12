@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bookings/{booking}/timeline', [BookingController::class, 'timeline']);
 
     // Partner Routes
+    Route::get('/partners/nearby', [\App\Http\Controllers\Api\PartnerController::class, 'nearby']);
     Route::post('/partner/location', [\App\Http\Controllers\Api\PartnerController::class, 'updateLocation']);
     Route::post('/partner/status', [\App\Http\Controllers\Api\PartnerController::class, 'updateStatus']);
     Route::post('/partner/withdrawals', [WithdrawalController::class, 'store']);
