@@ -91,9 +91,9 @@ const PartnerVerification = () => {
                                                     <Building2 size={24} />
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-primary leading-tight">{req.workshop_name}</p>
+                                                    <p className="font-bold text-primary leading-tight">{req.name}</p>
                                                     <p className="text-[12px] font-semibold text-on-surface-variant mt-1 flex items-center gap-1">
-                                                        <MapPin size={12} /> {req.address}
+                                                        <MapPin size={12} /> {req.email || "Alamat belum tersedia"}
                                                     </p>
                                                 </div>
                                             </div>
@@ -101,10 +101,10 @@ const PartnerVerification = () => {
                                         <td className="px-4 py-1.5">
                                             <div className="flex flex-col gap-1">
                                                 <p className="font-bold text-on-surface flex items-center gap-2">
-                                                    <User size={14} className="text-outline" /> {req.user?.name}
+                                                    <User size={14} className="text-outline" /> {req.name}
                                                 </p>
                                                 <p className="text-[12px] font-semibold text-on-surface-variant flex items-center gap-2">
-                                                    <Phone size={14} className="text-outline" /> {req.user?.phone}
+                                                    <Phone size={14} className="text-outline" /> {req.phone || "No HP belum tersedia"}
                                                 </p>
                                             </div>
                                         </td>
